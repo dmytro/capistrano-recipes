@@ -8,6 +8,9 @@ set_default(:unicorn_out_log) { "#{shared_path}/log/unicorn.stdout.log" }
 
 namespace :unicorn do
 
+  start_unicorn  = "cd #{current_path}; bundle exec unicorn -E production -c #{current_path}/config/unicorn.rb -D"
+  reload_unicorn = "kill -s USR2 `cat #{unicorn_pid}`"
+
   desc "Setup Unicorn initializer and app configuration"
   task :setup, roles: :app do
     run "mkdir -p #{shared_path}/config"
@@ -23,7 +26,7 @@ namespace :unicorn do
 
   desc "Start Unicorn"
   task :start, :except => { :no_release => true } do
-    run "cd #{current_path}; bundle exec unicorn -E production -c #{current_path}/config/unicorn.rb -D"
+    run start_unicorn
   end
   after "deploy:start", "unicorn:start"
 
@@ -35,7 +38,7 @@ namespace :unicorn do
 
   desc "Restart unicorn"
   task :restart, roles: :app do
-    run "kill -s USR2 `cat #{unicorn_pid}`"
+    run "if [[ -f #{unicorn_pid} ]]; then #{reload_unicorn}; else #{start_unicorn}; fi"
   end
 
 end
