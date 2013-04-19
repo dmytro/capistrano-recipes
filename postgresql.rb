@@ -37,6 +37,8 @@ namespace :postgresql do
       if data.chomp.strip != "1" 
         run %Q{#{psql} -c "create user #{postgresql_user} with password '#{postgresql_password}';"}
         create_yaml = true
+      else
+        logger.info "Not creating user role #{postgresql_user} since it already exists"
       end
     end
     
@@ -46,6 +48,8 @@ namespace :postgresql do
     run %Q{#{psql} -tc "select count(*) from pg_database where datname = '#{postgresql_database}'"} do |channel, stream, data|
       if data.chomp.strip != "1"
         run %Q{#{psql} -c "create database #{postgresql_database} owner #{postgresql_user};"}
+      else
+        logger.info "Not creating database #{postgresql_database} since it already exists"
       end
     end
   end
@@ -56,6 +60,8 @@ namespace :postgresql do
     if create_yaml
       run "mkdir -p #{shared_path}/config"
       template "postgresql.yml.erb", "#{shared_path}/config/database.yml"
+    else
+      logger.info "Database was not created during the deploy, not updating database.yml file"
     end
   end
   after "deploy:setup", "postgresql:setup"
