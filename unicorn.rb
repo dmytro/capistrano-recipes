@@ -9,7 +9,7 @@ set_default(:unicorn_out_log) { "#{shared_path}/log/unicorn.stdout.log" }
 namespace :unicorn do
 
   start_unicorn  = "cd #{current_path}; bundle exec unicorn -E production -c #{current_path}/config/unicorn.rb -D"
-  reload_unicorn = "kill -s USR2 `cat #{unicorn_pid}`"
+  reload_unicorn = "kill -s USR2 `cat #{unicorn_pid}` || true "
 
   desc "Setup Unicorn initializer and app configuration"
   task :setup, roles: :app do
