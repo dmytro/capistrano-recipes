@@ -35,9 +35,7 @@ namespace :postgresql do
       file = "#{pg_backup_dir}/#{db['database']}_dump.#{Time.now.strftime("%y%m%d.%H%M")}"+
         "#{pg_backup_suffix}.bz2"
 
-      run "pg_dump --clean --no-owner --no-privileges -U#{db['username']} "+
-        "-h localhost #{db['database']} | bzip2 > #{file}" 
-      do |ch, stream, out|
+      run "pg_dump --clean --no-owner --no-privileges -U#{db['username']} -h localhost #{db['database']} | bzip2 > #{file}" do |ch, stream, out|
         ch.send_data "#{db['password']}\n" if out =~ /^Password:/
         puts out
       end
