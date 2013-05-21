@@ -1,3 +1,6 @@
+#
+# Manage config/application.yml file: concatenate example and secrets
+# files.
 namespace :application_yml do
   
   desc "Setup application.yml file"
@@ -9,6 +12,7 @@ namespace :application_yml do
   desc "Upload application.*.yml files"
   task :upload_yml do
     %w{ secrets example}.each do |file|
+      run_locally "test -f  #{%x{pwd}.chomp}/config/application.#{file}.yml || touch #{%x{pwd}.chomp}/config/application.#{file}.yml"
       upload "#{%x{pwd}.chomp}/config/application.#{file}.yml", "#{shared_path}/config/application.#{file}.yml"
     end
   end
