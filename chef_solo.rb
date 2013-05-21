@@ -39,5 +39,5 @@ EOF
   end
 
 
-  before "deploy:install", "chefsolo:deploy"
+  before "deploy", "chefsolo:deploy"
 end
