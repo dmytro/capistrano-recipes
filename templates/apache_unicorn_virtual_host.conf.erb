@@ -1,0 +1,31 @@
+<VirtualHost *:<%= apache_port %>>
+  ServerName <%= web_domain %>
+  ServerAlias www.<%= web_domain %>
+
+  # Point this to your public folder 
+  DocumentRoot "<%= current_path %>/public"
+
+  RewriteEngine On
+
+  <Proxy balancer://unicornservers>
+    BalancerMember http://127.0.0.1:5000
+  </Proxy>
+
+  # Redirect all non-static requests to thin
+  RewriteCond %{DOCUMENT_ROOT}/%{REQUEST_FILENAME} !-f
+  RewriteRule ^/(.*)$ balancer://unicornservers%{REQUEST_URI} [P,QSA,L]
+
+  ProxyPass / balancer://unicornservers/
+  ProxyPassReverse / balancer://unicornservers/
+  ProxyPreserveHost on
+
+  <Proxy *>
+    Order deny,allow
+    Allow from all
+  </Proxy>
+
+  # Custom log file locations
+  ErrorLog  "/var/log/httpd/<%= virtual_host %>_error.log"
+  CustomLog "/var/log/httpd/<%= virtual_host %>_access.log" combined
+
+</VirtualHost>

@@ -1,0 +1,8 @@
+{
+	"run_list": [ 
+		"recipe[apache2::mod_proxy]",
+		"recipe[apache2::mod_proxy_balancer]",
+		"recipe[apache2::mod_proxy_http]",
+		"recipe[apache2::mod_rewrite]"
+	]
+}
