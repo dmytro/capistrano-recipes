@@ -21,6 +21,9 @@ namespace :database do
 
   desc "Symlink the database.yml file into latest release"
   task :symlink, roles: :app do
+    if database_adapter == 'sqlite3'
+      run "mkdir -p #{shared_path}/db && chown -R #{user} #{shared_path}/db && chmod 750 #{shared_path}/db"
+    end
     run "ln -nfs #{shared_path}/config/database.yml #{release_path}/config/database.yml"
   end
   after "deploy:finalize_update", "database:symlink"
