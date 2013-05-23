@@ -1,8 +1,14 @@
 production:
   adapter: <%= database_adapter %>
   encoding: unicode
-  database: <%= database_name %>
   pool: 5
+  timeout: 5000
+<% if database_adapter == 'sqlite3' -%>
+<%# Full path to the shared directory, so that there's no need to create symlink -%>
+  database: <%= shared_path %>/db/<%= database_name %>.sqlite3
+<% else %>
+  database: <%= database_name %>
   username: <%= database_user %>
   password: <%= database_password %>
   host: <%= database_host %>
+<% end %>
