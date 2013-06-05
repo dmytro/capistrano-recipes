@@ -5,7 +5,7 @@
 
 set_default :apache_port,           80
 set_default :apache_available_dir,  "/etc/httpd/sites-available"
-set_default :web_domain,            "#{application}.com"
+set_default :domain_name,            "#{application}.com"
 set_default :virtual_host,          "#{application}"
 set_default :unicorn_port,          5000 # Note: apache is not able to listen on a socket.
 
@@ -26,7 +26,7 @@ Change values accordingly to your host.
 
 * set :apache_port,           80
 * set :apache_available_dir,  "/etc/httpd/sites-available"
-* set :web_domain,            "#{application}.com"
+* set :domain_name,            "#{application}.com"
 * set :virtual_host,          "#{application}"
 
 EOF

@@ -49,8 +49,8 @@ EOF
     upload( temp, temp, :via => :scp)
     run_locally "rm -f #{temp}"
 
-    run "mkdir -p #{chef_solo_remote} && cd #{chef_solo_remote} && tar xfz #{temp} && rm -f #{temp}"    
-    run "#{try_sudo} cd #{chef_solo_remote} && bash ./install.sh #{chef_solo_json}"
+    run "mkdir -p #{chef_solo_remote} && cd #{chef_solo_remote} && #{try_sudo} tar xfz #{temp} && rm -f #{temp}"    
+    run "cd #{chef_solo_remote} && #{try_sudo} bash ./install.sh #{chef_solo_json}"
   end
   
   desc "Run chef-solo caommand remotely. Specify JSON file as: -s json=<file>"

@@ -11,7 +11,7 @@ namespace :database do
   desc "Generate the database.yml configuration file."
   task :setup, roles: :app do
     if create_database_yaml
-      run "mkdir -p #{shared_path}/config"
+      run "#{try_sudo} mkdir -p #{shared_path}/config"
       template "database.yml.erb", "#{shared_path}/config/database.yml"
     else
       logger.info "Configured to not create database.yml file"
@@ -22,9 +22,9 @@ namespace :database do
   desc "Symlink the database.yml file into latest release"
   task :symlink, roles: :app do
     if database_adapter == 'sqlite3'
-      run "mkdir -p #{shared_path}/db && chown -R #{user} #{shared_path}/db && chmod 750 #{shared_path}/db"
+      run "#{try_sudo} mkdir -p #{shared_path}/db && #{try_sudo} chown -R #{user} #{shared_path}/db && #{try_sudo} chmod 750 #{shared_path}/db"
     end
-    run "ln -nfs #{shared_path}/config/database.yml #{release_path}/config/database.yml"
+    run "#{try_sudo} ln -nfs #{shared_path}/config/database.yml #{release_path}/config/database.yml"
   end
   after "deploy:finalize_update", "database:symlink"
 
