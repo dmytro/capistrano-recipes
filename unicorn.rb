@@ -42,4 +42,22 @@ namespace :unicorn do
     run "if [[ -f #{unicorn_pid} ]]; then #{reload_unicorn}; else #{start_unicorn}; fi"
   end
 
+  namespace :logs do 
+    
+    desc "Tail Unicorn logs"
+    task :tail do 
+      trap("INT") { puts 'Interupted'; exit 0; }
+      run "tail -f #{shared_path}/log/unicorn*.log" do |channel, stream, data|
+        puts  # for an extra line break before the host name
+        puts "#{channel[:host]}: #{data}" 
+        break if stream == :err    
+      end
+    end
+    
+    desc "Clear all Unicorn logs"
+    task :clear do
+      run "for i in #{shared_path}/log/unicorn*; do cat /dev/null > $i; done"
+    end
+end
+
 end
