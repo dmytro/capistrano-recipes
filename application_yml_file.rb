@@ -7,6 +7,7 @@ namespace :application_yml do
   task :setup do
     run "cat #{shared_path}/config/application.secrets.yml #{shared_path}/config/application.example.yml > #{shared_path}/config/application.yml"
   end
+  after "bundle:install", "application_yml:setup"
   before "application_yml:setup", "application_yml:upload_yml"
 
   desc "Upload application.*.yml files"
