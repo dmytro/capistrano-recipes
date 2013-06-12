@@ -50,7 +50,7 @@ EOF
     run_locally "rm -f #{temp}"
 
     run "mkdir -p #{chef_solo_remote} && cd #{chef_solo_remote} && #{try_sudo} tar xfz #{temp} && rm -f #{temp}", :shell => :bash
-    run "cd #{chef_solo_remote} && #{try_sudo} bash ./install.sh #{chef_solo_json}", :shell => :bash
+    run "cd #{chef_solo_remote} && #{sudo} bash ./install.sh #{chef_solo_json}", :shell => :bash
   end
   
   desc "Run chef-solo caommand remotely. Specify JSON file as: -s json=<file>"
