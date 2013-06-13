@@ -41,13 +41,16 @@ namespace :unicorn do
 
   desc "Restart unicorn"
   task :restart, roles: :app do
-    stat = capture unicorn_running
-    if stat == '0'
+
+    running = ( capture(unicorn_running).strip == '0')
+    
+    if running
+      logger.info "Reloading Unicorn"
       run reload_unicorn
     else
+      logger.info "Unicorn is not running. Starting."
       run start_unicorn
     end
-    # run "#{unicorn_running} && #{reload_unicorn} || #{start_unicorn} "
   end
 
 end
