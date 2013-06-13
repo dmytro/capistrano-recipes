@@ -5,7 +5,7 @@ namespace :application_yml do
   
   desc "Setup application.yml file"
   task :setup do
-    run "cat #{shared_path}/config/application.secrets.yml #{shared_path}/config/application.example.yml > #{shared_path}/config/application.yml"
+    run "cd #{release_path} && rake setup:config:config/application.yml"
   end
   after "bundle:install", "application_yml:setup"
   before "application_yml:setup", "application_yml:upload_yml"
