@@ -9,8 +9,10 @@ set_default(:unicorn_port) { 5000 } # For use with Apache since Apache can't lis
 
 namespace :unicorn do
 
-  start_unicorn  = "cd #{current_path}; bundle exec unicorn -E production -c #{current_path}/config/unicorn.rb -D"
-  reload_unicorn = "kill -s USR2 `cat #{unicorn_pid}` || true "
+  start_unicorn  = "(cd #{current_path} && bundle exec unicorn -E production -c #{current_path}/config/unicorn.rb -D)"
+  reload_unicorn = "( kill -s USR2 `cat #{unicorn_pid}` || true )"
+
+  unicorn_running = "( test -f #{unicorn_pid} && ps $(cat #{unicorn_pid}) > /dev/null ) ; echo $? "
 
   desc "Setup Unicorn initializer and app configuration"
   task :setup, roles: :app do
@@ -39,7 +41,13 @@ namespace :unicorn do
 
   desc "Restart unicorn"
   task :restart, roles: :app do
-    run "if [[ -f #{unicorn_pid} ]]; then #{reload_unicorn}; else #{start_unicorn}; fi"
+    stat = capture unicorn_running
+    if stat == '0'
+      run reload_unicorn
+    else
+      run start_unicorn
+    end
+    # run "#{unicorn_running} && #{reload_unicorn} || #{start_unicorn} "
   end
 
 end
