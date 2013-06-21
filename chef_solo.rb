@@ -6,6 +6,7 @@ set_default :chef_solo_path,       File.expand_path("../chef-solo/", File.dirnam
 set_default :chef_solo_json,       "empty.json"
 set_default :chef_solo_remote,     "~/chef"
 set_default :chef_solo_command,    %Q{cd #{chef_solo_remote} && #{try_sudo} chef-solo --config #{chef_solo_remote}/solo.rb --json-attributes }
+set_default  :chef_solo_bootstrap_skip, false
 
 namespace :chefsolo do 
 
@@ -15,7 +16,7 @@ namespace :chefsolo do
    Task needs chef-solo repository git@github.com:dmytro/chef-solo.git
    installed as git submodule or directory.
 
-   Configuration adn defaults
+   Configuration and defaults
    --------------------------
 
     * set :chef_solo_path, <PATH> 
@@ -39,18 +40,26 @@ namespace :chefsolo do
       Remote command to execute chef-solo.  Use it as: `run
       chef_solo_command + 'empty.json'` in your recipes.
 
+    Command line option
+    ----------------------
+    If you want to skip bootstrapping for the current run execute as:
+
+        cap deploy -s chef_solo_bootstrap_skip=true
 
 
 EOF
   task :deploy do
-    temp = %x{ mktemp /tmp/captemp-tar.XXXX }.chomp
 
-    run_locally "cd #{chef_solo_path} && tar cfz #{temp} . "
-    upload( temp, temp, :via => :scp)
-    run_locally "rm -f #{temp}"
-
-    run "mkdir -p #{chef_solo_remote} && cd #{chef_solo_remote} && #{try_sudo} tar xfz #{temp} && rm -f #{temp}"    
-    run "cd #{chef_solo_remote} && #{try_sudo} bash ./install.sh #{chef_solo_json}"
+    unless chef_solo_bootstrap_skip
+      temp = %x{ mktemp /tmp/captemp-tar.XXXX }.chomp
+      
+      run_locally "cd #{chef_solo_path} && tar cfz #{temp} . "
+      upload( temp, temp, :via => :scp)
+      run_locally "rm -f #{temp}"
+      
+      run "mkdir -p #{chef_solo_remote} && cd #{chef_solo_remote} && #{try_sudo} tar xfz #{temp} && rm -f #{temp}", :shell => :bash
+      run "cd #{chef_solo_remote} && #{sudo} bash ./install.sh #{chef_solo_json}", :shell => :bash
+    end
   end
   
   desc "Run chef-solo caommand remotely. Specify JSON file as: -s json=<file>"
