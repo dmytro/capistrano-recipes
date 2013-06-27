@@ -25,9 +25,9 @@ HELP
 
       case release
       when /debian/
-        surun "apt-get install sudo"
+        surun "apt-get install -y sudo"
       when /redhat/
-        surun "yum install sudo"
+        surun "yum install -y sudo"
       end
 
     end
