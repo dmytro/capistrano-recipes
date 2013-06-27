@@ -14,6 +14,9 @@ to access network.
 Recipe uses 'su' command for installation and will ask for root
 password.
 
+Currently supported Debian and RedHat type distros (i.e. apt-get and
+yum installs).
+
 HELP
 
     task :sudo do 
@@ -22,6 +25,16 @@ HELP
       next if installed
 
       release = capture("\ls -1d /etc/*{release,version} 2> /dev/null || true ", shell: :bash)
+
+      puts <<-MSG
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+SUDO is not installed. 
+
+Please type root password at the prompt below, 
+we will try to install it.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+MSG
 
       case release
       when /debian/
@@ -33,3 +46,9 @@ HELP
     end
   end
 end
+
+before "chefsolo:deploy", "prerequisites:install:sudo"
+
+before "deploy", "prerequisites:install:sudo" # If chef-solo deploy is
+                                              # not used, still make
+                                              # sure sudo is installed

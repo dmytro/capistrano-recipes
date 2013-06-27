@@ -5,8 +5,12 @@
 #   # Executes
 #   # su - -c '/etc/init.d/apache reload'
 #
+# Methods sets :root_password attribute, so that this method is
+# executed only once during the run.
+#
 def surun(command)
-  password = fetch(:root_password, Capistrano::CLI.password_prompt("root password: "))
+  password = Capistrano::CLI.password_prompt("root password: ")
+  
   run("su - -c '#{command}'", :shell => :bash) do |channel, stream, output|
     channel.send_data("#{password}n") if output
   end
