@@ -21,7 +21,7 @@ EOF
     find_servers_for_task(current_task).each do |server|
       role_names_for_host(server).each do |role|
         file = "#{role.to_s}.json"
-        run  "#{chef_solo_command} #{file}", :shell => :bash if File.exists? "#{chef_solo_path}/#{file}"
+        run  "#{chef_solo_command}#{file}" if File.exists? "#{chef_solo_path}/#{file}" # ! No space between chef_solo_command and file !
       end
     end
   end
