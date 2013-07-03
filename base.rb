@@ -21,3 +21,11 @@ def surun(command)
     channel.send_data("#{password}n") if output
   end
 end
+
+##
+# Load additional recipes from file. Extension for the DSL.
+#
+def recipe name, local: false
+  path = local ? "local_recipes" : "recipes"
+  load File.expand_path("lib/#{path}/#{name.to_s}.rb")
+end
