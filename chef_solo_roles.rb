@@ -27,6 +27,6 @@ EOF
   end
 
   before "deploy", "chefsolo:roles"
-  before "chefsolo:roles", "chefsolo:deploy"
+#  before "chefsolo:roles", "chefsolo:deploy"
   
 end
