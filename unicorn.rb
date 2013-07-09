@@ -40,9 +40,8 @@ namespace :unicorn do
   end
   after "deploy:stop", "unicorn:stop"
 
-  dsesc "Reload unicorn"
-  desc "Restart unicorn"
-  task :restart, roles: :app do
+  desc "Reload unicorn"
+  task :reload, roles: :app do
 
     running = ( capture(unicorn_running).strip == '0')
     
