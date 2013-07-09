@@ -17,7 +17,7 @@ namespace :nginx do
     template "nginx.conf.erb", "/tmp/nginx_conf"
     run "#{try_sudo} mkdir -p #{shared_path}/config"
     run "#{try_sudo} cp /tmp/nginx_conf #{shared_path}/config/nginx.conf"
-    run "#{try_sudo} mkdir -p /etc/nginx/sites-enabled/#{application}"
+    run "#{try_sudo} mkdir -p /etc/nginx/sites-enabled/"
     run "#{try_sudo} mv /tmp/nginx_conf /etc/nginx/sites-enabled/#{application}"
     run "#{try_sudo} rm -f /etc/nginx/sites-enabled/default"
   end
