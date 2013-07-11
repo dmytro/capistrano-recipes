@@ -9,6 +9,15 @@ set_default(:unicorn_port) { 5000 } # For use with Apache since Apache can't lis
 
 namespace :unicorn do
 
+  namespace :init_d do
+
+    decs "Install /etc/init.d file for Unicorn"
+    task :install do
+      template "unicorn.init.erb", "/tmp/unicorn.init"
+      run "#{sudo} mv /tmp/unicorn.init /etc/init.d/unicorn"
+    end
+  end
+
   start_unicorn  = "(cd #{current_path} && bundle exec unicorn -E production -c #{current_path}/config/unicorn.rb -D)"
   reload_unicorn = "( kill -s USR2 `cat #{unicorn_pid}` || true )"
 
