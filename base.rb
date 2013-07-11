@@ -22,10 +22,12 @@ def surun(command)
   end
 end
 
+
+set_default :recipe_base, "lib"
 ##
 # Load additional recipes from file. Extension for the DSL.
 #
-def recipe name, local: false
+def recipe name, local = false
   path = local ? "local_recipes" : "recipes"
-  load File.expand_path("lib/#{path}/#{name.to_s}.rb")
+  load File.expand_path("#{recipe_base}/#{path}/#{name.to_s}.rb")
 end
