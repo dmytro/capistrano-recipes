@@ -26,13 +26,13 @@ namespace :nginx do
   %w[start stop].each do |command|
     desc "#{command} nginx"
     task command, roles: :web do
-      run "#{try_sudo} service nginx #{command}"
+      run "#{sudo} service nginx #{command}"
     end
     after "deploy:#{command}", "nginx:#{command}"
   end
 
   desc "Restart nginx"
   task :restart, roles: :web do
-    run "#{try_sudo} service nginx restart"
+    run "#{sudo} service nginx restart"
   end
 end

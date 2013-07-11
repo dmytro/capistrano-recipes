@@ -11,6 +11,8 @@ Recipes
 
 - base.rb - this file is required. It sets some common methods used in other recipes.
 
+- nginx_monit.rb - Recipe to restart Nginx on systems with Monit
+
 - apache_unicorn.rb - Create virtual host for Apache with Unicorn
   - **Templates**
       - templates/apache_unicorn_modules.json.erb

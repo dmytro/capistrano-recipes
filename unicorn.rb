@@ -11,7 +11,7 @@ namespace :unicorn do
 
   namespace :init_d do
 
-    decs "Install /etc/init.d file for Unicorn"
+    desc "Install /etc/init.d file for Unicorn"
     task :install do
       template "unicorn.init.erb", "/tmp/unicorn.init"
       run "#{sudo} mv /tmp/unicorn.init /etc/init.d/unicorn"
@@ -49,7 +49,7 @@ namespace :unicorn do
   end
   after "deploy:stop", "unicorn:stop"
 
-  desc "Reload unicorn"
+  desc "Reload Unicorn"
   task :reload, roles: :app do
 
     running = ( capture(unicorn_running).strip == '0')
