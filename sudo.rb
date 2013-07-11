@@ -49,6 +49,7 @@ end
 
 before "chefsolo:deploy", "prerequisites:install:sudo"
 
-before "deploy", "prerequisites:install:sudo" # If chef-solo deploy is
-                                              # not used, still make
-                                              # sure sudo is installed
+# TODO: fix it - runs twice
+# before "deploy", "prerequisites:install:sudo" # If chef-solo deploy is
+#                                               # not used, still make
+#                                               # sure sudo is installed

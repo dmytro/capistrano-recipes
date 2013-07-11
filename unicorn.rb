@@ -20,6 +20,7 @@ namespace :unicorn do
 
   start_unicorn  = "(cd #{current_path} && bundle exec unicorn -E production -c #{current_path}/config/unicorn.rb -D)"
   reload_unicorn = "( kill -s USR2 `cat #{unicorn_pid}` || true )"
+  stop_unicorn = "( kill `cat #{unicorn_pid}` || true )"
 
   unicorn_running = "( test -f #{unicorn_pid} && ps $(cat #{unicorn_pid}) > /dev/null ) ; echo $? "
 
@@ -48,6 +49,20 @@ namespace :unicorn do
   end
   after "deploy:stop", "unicorn:stop"
 
+  desc "Reload unicorn"
+  task :reload, roles: :app do
+
+    running = ( capture(unicorn_running).strip == '0')
+    
+    if running
+      logger.info "Reloading Unicorn"
+      run reload_unicorn
+    else
+      logger.info "Unicorn is not running. Starting."
+      run start_unicorn
+    end
+  end
+
   desc "Restart unicorn"
   task :restart, roles: :app do
 
@@ -55,7 +70,8 @@ namespace :unicorn do
     
     if running
       logger.info "Reloading Unicorn"
-      run reload_unicorn
+      run stop_unicorn
+      run start_unicorn
     else
       logger.info "Unicorn is not running. Starting."
       run start_unicorn
