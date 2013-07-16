@@ -31,6 +31,13 @@ namespace :unicorn do
   end
   after "deploy:setup", "unicorn:setup"
 
+  desc "Copy unicorn config"
+  task :copy do
+    upload "config/unicorn.rb", "#{shared_path}/config/unicorn.rb"
+  end
+  before "unicorn:symlink", "unicorn:copy"
+
+
   desc "Symlink unicorn config"
   task :symlink do
     run "ln -nfs #{unicorn_config} #{release_path}/config/unicorn.rb"
