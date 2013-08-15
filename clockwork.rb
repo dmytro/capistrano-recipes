@@ -14,7 +14,7 @@ namespace :clockwork do
   desc "Start clockwork"
   task :start, :roles => :app, :on_no_matching_servers => :continue do
 
-    run "cd #{current_path}; RAILS_ENV=production nohup bundle exec clockwork #{clockwork_worker.rb} -e #{rails_env} >> #{cw_log_file} 2>&1 &", :pty => false
+    run "cd #{current_path}; RAILS_ENV=production nohup bundle exec clockwork #{clockwork_worker} -e #{rails_env} >> #{cw_log_file} 2>&1 &", :pty => false
     run "ps -C ruby -o pid,cmd | awk '$0 ~ /bin\\/clockwork/ {print $1 }' > #{cw_pid_file} "
 
   end

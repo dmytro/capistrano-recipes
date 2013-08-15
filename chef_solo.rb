@@ -53,7 +53,7 @@ EOF
     unless chef_solo_bootstrap_skip
       temp = %x{ mktemp /tmp/captemp-tar.XXXX }.chomp
       
-      run_locally "cd #{chef_solo_path} && tar cfz #{temp} . "
+      run_locally "cd #{chef_solo_path} && tar cfz  #{temp} --exclude ./tmp --exclude ./.git  . "
       upload( temp, temp, :via => :scp)
       run_locally "rm -f #{temp}"
       
