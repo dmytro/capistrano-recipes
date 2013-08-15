@@ -5,7 +5,7 @@
 set_default :chef_solo_path,       File.expand_path("../chef-solo/", File.dirname(__FILE__))
 set_default :chef_solo_json,       "empty.json"
 set_default :chef_solo_remote,     "~/chef"
-set_default :chef_solo_command,    %Q{cd #{chef_solo_remote} && #{try_sudo} -i chef-solo --config #{chef_solo_remote}/solo.rb --json-attributes #{chef_solo_remote}/} # No space at the end!
+set_default :chef_solo_command,    %Q{cd #{chef_solo_remote} && #{try_sudo} -i chef-solo --config #{chef_solo_remote}/solo.rb --json-attributes } 
 set_default  :chef_solo_bootstrap_skip, false
 
 namespace :chefsolo do 
