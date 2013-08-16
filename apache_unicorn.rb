@@ -31,12 +31,13 @@ Change values accordingly to your host.
 
 EOF
     task :configure do
-      json = "/tmp/apache_unicorn_modules.json"
+      json = "/tmp/#{user}_apache_unicorn_modules.json"
+puts "JSON" + json
       template "apache_unicorn_virtual_host.conf.erb", "#{apache_available_dir}/#{virtual_host}"
       run "#{try_sudo} a2ensite #{virtual_host}"
 
       template "apache_unicorn_modules.json.erb", json
-      run "#{chef_solo_command} #{json} && rm -f #{json}"
+      run "#{chef_solo_command} #{json} ; rm -f #{json}"
     end
 
   end

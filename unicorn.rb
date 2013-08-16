@@ -27,15 +27,15 @@ namespace :unicorn do
   desc "Setup Unicorn initializer and app configuration"
   task :setup, roles: :app do
     run "mkdir -p #{shared_path}/config"
-    template "unicorn.rb.erb", unicorn_config
   end
   after "deploy:setup", "unicorn:setup"
 
-  desc "Copy unicorn config"
+  desc "Generate and copy unicorn config"
   task :copy do
-    upload "config/unicorn.rb", "#{shared_path}/config/unicorn.rb"
+    template "unicorn.rb.erb", unicorn_config
   end
   before "unicorn:symlink", "unicorn:copy"
+  before "unicorn:copy",    "unicorn:setup"
 
 
   desc "Symlink unicorn config"
