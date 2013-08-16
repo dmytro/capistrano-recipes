@@ -4,7 +4,7 @@
 
 set_default :chef_solo_path,       File.expand_path("../chef-solo/", File.dirname(__FILE__))
 set_default :chef_solo_json,       "empty.json"
-set_default :chef_solo_remote,     "~/chef"
+set_default :chef_solo_remote,     "~#{user}/chef"
 set_default :chef_solo_command,    %Q{cd #{chef_solo_remote} && #{try_sudo} -i chef-solo --config #{chef_solo_remote}/solo.rb --json-attributes } 
 set_default  :chef_solo_bootstrap_skip, false
 
@@ -57,8 +57,8 @@ EOF
       upload( temp, temp, :via => :scp)
       run_locally "rm -f #{temp}"
       
-      run "mkdir -p #{chef_solo_remote} && cd #{chef_solo_remote} && #{try_sudo} tar xfz #{temp} && rm -f #{temp}", :shell => :bash
-      run "cd #{chef_solo_remote} && #{sudo} bash ./install.sh #{chef_solo_json}", :shell => :bash
+      run "mkdir -p #{chef_solo_remote} && cd #{chef_solo_remote} && tar xfz #{temp} && rm -f #{temp}", :shell => :bash
+      run "#{sudo} bash #{chef_solo_remote}/install.sh #{chef_solo_json}", :shell => :bash
     end
   end
   
