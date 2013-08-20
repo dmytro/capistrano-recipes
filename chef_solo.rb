@@ -58,7 +58,7 @@ EOF
       run_locally "rm -f #{temp}"
       
       run "mkdir -p #{chef_solo_remote} && cd #{chef_solo_remote} && tar xfz #{temp} && rm -f #{temp}", :shell => :bash
-      run "#{sudo} bash #{chef_solo_remote}/install.sh #{chef_solo_json}", :shell => :bash
+      run "#{sudo} bash #{chef_solo_remote}/install.sh #{chef_solo_json}", :shell => :bash, :pty => true
     end
   end
   
