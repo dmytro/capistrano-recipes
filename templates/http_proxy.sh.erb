@@ -1,0 +1,8 @@
+#
+# Managed by Capistrano
+# Installed in /etc/profile.d/http_proxy globally  for all users.
+#
+
+export http_proxy=http://<%= proxy_host -%>:<%= proxy_port %>
+export https_proxy=http://<%= proxy_host -%>:<%= proxy_port %>
+export ftp_proxy=http://<%= proxy_host -%>:<%= proxy_port %>
