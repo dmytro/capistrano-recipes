@@ -22,6 +22,27 @@ def surun(command)
   end
 end
 
+# Try to execute command with sudo, if it fails fallback to surun.
+#
+def sudo_or_su(command)
+  begin
+    sudo command
+  rescue
+    puts <<-EMSG
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Sudo is not installed (or configured) following commands will be executed with root password. 
+
+#{command}
+
+Please type root password at the prompt.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+EMSG
+    surun(command)
+  end
+end
 
 # Runs command remotely and return 0 or other status code
 #
