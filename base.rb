@@ -17,8 +17,8 @@ end
 def surun(command)
   password = Capistrano::CLI.password_prompt("root password: ")
   
-  run("su - -c '#{command}'", :shell => :bash) do |channel, stream, output|
-    channel.send_data("#{password}n") if output
+  run("su - -c '#{command}'", shell: :bash, pty: true ) do |channel, stream, output|
+    channel.send_data("#{password}\n") if output
   end
 end
 
