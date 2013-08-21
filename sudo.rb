@@ -21,7 +21,7 @@ HELP
 
     task :sudo do 
 
-      installed = (capture("which sudo > /dev/null 2>&1 ; echo $?", shell: :bash).strip == '0')
+      installed = test_command "which sudo"
       next if installed
 
       release = capture("\ls -1d /etc/*{release,version} 2> /dev/null || true ", shell: :bash)
