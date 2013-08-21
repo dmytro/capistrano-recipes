@@ -23,6 +23,17 @@ def surun(command)
 end
 
 
+# Runs command remotely and return 0 or other status code
+#
+# @param cmd Shell command to tun
+#
+# @return true or false
+def test_command cmd
+
+  cmd << " > /dev/null 2>&1 ; echo $?"
+  return(capture(cmd, shell: :bash, pty: true).strip.to_i == 0)
+end
+
 set_default :recipe_base, "lib"
 ##
 # Load additional recipes from file. Extension for the DSL.
