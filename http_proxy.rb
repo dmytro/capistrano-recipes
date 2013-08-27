@@ -49,14 +49,19 @@ Configure host as client of HTTP proxy"
 
 
 EOF
-  task :client, :except => {  :role => 'proxy' } do
-    set :proxy_host, find_servers(:role => 'proxy').first # Should be only one proxy
+  task :client, :except => {  :roles => 'proxy' } do
+    set :proxy_host, find_servers(:roles => 'proxy').first # Should be only one proxy
+
     next if proxy_host.nil?
 
     set :client_hosts, find_servers - [proxy_host]
 
     template "http_proxy.sh.erb", "/tmp/http_proxy.sh"
-    sudo_or_su "mv /tmp/http_proxy.sh /etc/profile.d/http_proxy.sh"
+    sudo "mv -f /tmp/http_proxy.sh /etc/profile.d/http_proxy.sh || true", shell: :bash 
+  end
+
+  task :disable do 
+    sudo "rm -f  /etc/profile.d/http_proxy.sh || true", shell: :bash 
   end
 
   desc <<EOF
@@ -64,11 +69,17 @@ Bootstrap and configure host as HTTP proxy"
 
 
 EOF
-  task :server, roles: :proxy do
+  task :server do
+    set :only_hosts, find_servers(roles: :proxy)
+
     top.prerequisites.install.sudo
     top.prerequisites.configure.sudo
     top.chefsolo.deploy
     top.chefsolo.roles
+
+    unset :only_hosts
+
+    puts "################################## DONE PROXY ################################ "
   end
 
 

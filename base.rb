@@ -16,10 +16,14 @@ end
 #
 def surun(command)
   password = Capistrano::CLI.password_prompt("root password: ")
-  
-  run("su - -c '#{command}'", shell: :bash, pty: true ) do |channel, stream, output|
+
+  options = { shell: :bash, pty: true }
+  options.merge! hosts: only_hosts if exists? :only_hosts
+
+  run("su - -c '#{command}'", options) do |channel, stream, output|
     channel.send_data("#{password}\n") if output
   end
+
 end
 
 # Try to execute command with sudo, if it fails fallback to surun.
@@ -31,7 +35,8 @@ def sudo_or_su(command)
     puts <<-EMSG
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Sudo is not installed (or configured) following commands will be executed with root password. 
+Sudo is not installed (or not configured) 
+following commands will be executed with root password. 
 
 #{command}
 

@@ -50,6 +50,10 @@ namespace :chefsolo do
 EOF
   task :deploy do
 
+    # Limit execution to only hosts in the list if list provided
+    options = { shell: :bash, pty: true }
+    options.merge! hosts: only_hosts if exists? :only_hosts
+
     unless chef_solo_bootstrap_skip
       temp = %x{ mktemp /tmp/captemp-tar.XXXX }.chomp
       
@@ -57,13 +61,18 @@ EOF
       upload( temp, temp, :via => :sftp)
       run_locally "rm -f #{temp}"
       
-      run "mkdir -p #{chef_solo_remote} && cd #{chef_solo_remote} && tar xfz #{temp} && rm -f #{temp}", :shell => :bash
-      run "#{sudo} bash #{chef_solo_remote}/install.sh #{chef_solo_json}", :shell => :bash, :pty => true
+      run "mkdir -p #{chef_solo_remote} && cd #{chef_solo_remote} && tar xfz #{temp} && rm -f #{temp}", options
+      run "#{sudo} -i bash #{chef_solo_remote}/install.sh #{chef_solo_json}", options
     end
   end
   
   desc "Run chef-solo caommand remotely. Specify JSON file as: -s json=<file>"
   task :run_remote do
+
+    # Limit execution to only hosts in the list if list provided
+    options = { shell: :bash, pty: true }
+    options.merge! hosts: only_hosts if exists? :only_hosts
+
     run chef_solo_command + (json ? json : "empty.json")
   end
 

@@ -18,7 +18,8 @@ EOF
 
   task :roles do 
 
-    find_servers_for_task(current_task).each do |server|
+    servers = exists?(:only_hosts) ? Array(only_hosts) : find_servers_for_task(current_task)
+    servers.each do |server|
       role_names_for_host(server).each do |role|
         file = "#{role.to_s}.json"
         if File.exists? "#{chef_solo_path}/#{file}"
