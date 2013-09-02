@@ -4,32 +4,105 @@ Capistrano recipes
 ======================
 
 
-This directory contains recipes to be used together with Capistrano. To use recipe in the deployment require needed file(s) from your `deploy.rb` file. **Note:** Do not automatically require all files. Some recipes implement same functionalily differently dependint on your requirements.
+This directory contains recipes to be used together with Capistrano. To use recipe in the deployment require needed file(s) from your `deploy.rb` file. **Note:** Do not automatically require all files. Some recipes implement same functionally differently depending on your requirements.
 
 Recipes
 -----------
 
+### Base
+
+
 - base.rb - this file is required. It sets some common methods used in other recipes.
 
-- nginx_monit.rb - Recipe to restart Nginx on systems with Monit
+#### Capistrano DSL extensions
 
-- apache_unicorn.rb - Create virtual host for Apache with Unicorn
-  - **Templates**
-      - templates/apache_unicorn_modules.json.erb
-      - templates/apache_unicorn_virtual_host.conf.erb
 
-- application_yml_file.rb - Manage config/application.yml file: concatenate example and secrets files
+File `base.rb` contains several extensions that can be useful  with Capistrano deployments (and also used in this recipes collection).
 
-- Asset Precompile recipes - see {file:ASSETS_PRECOMPILE.md} for details
-  - assets_precompile.rb
-  - assets_precompile_conditional.rb
-  - assets_precompile_local.rb
+##### recipe
 
-- check.rb - deprecated
+Load file with recipe by it's name. Just a helper.
+
+##### upload_dir
+
+Same as `upload` in Capistrano but for whole directory by tarring it locally and untarring remotely.
+
+##### surun
+
+Ask for `root` password and execute command remotely via `su -`. Fallback for the situations when sudo is not installed.
+
+##### template
+
+Helper to parse and upload to remote ERB template.
+
+##### set_default
+
+Set variable conditionally.
+
+----
+
+### Infrastructure and setup
+
+#### Setup
+
+- rbenv.rb - TODO
+- setup.rb - Change ownership of the created directories at the setup stage
+  - `:deploy:chown_dirs`
+
+#### Remote logs
+
+- logs.rb - Manage log/production.log file: tail and truncate
+
+#### Sudo
+
+- sudo.rb - Install sudo on the remote server. Do nothing if sudo installed.
+
+#### Chef
+
 - chef_solo.rb - 2 tasks
   - `chefsolo:deploy` - Run chef-solo deploy on the remote server (bootstrap server)
-  - `chefsolo:run_remote` - deploy sigle JSON chef-solo file
+  - `chefsolo:run_remote` - deploy single JSON chef-solo file
 - `chefsolo:roles` chef_solo_roles.rb - Deploy JSON file corresponding to role (uses `chefsolo:run_remote`)
+
+#### Puppet
+
+- puppet.rb
+
+Similar to chef-solo above. Bootstraps puppet and provide task to execute manifest remotely. Puppet recipe requires chef-solo bootstrap.
+
+----
+
+### Web-servers and app.servers
+
+#### nginx.rb
+
+TODO: refactor install to use Chef
+
+- **Template**
+  - templates/nginx.conf.erb
+
+
+#### nginx_monit.rb
+
+Recipe to restart Nginx on systems with Monit
+
+####  apache_unicorn.rb - Create virtual host for Apache with Unicorn
+- **Templates**
+  - templates/apache_unicorn_modules.json.erb
+  - templates/apache_unicorn_virtual_host.conf.erb
+
+#### unicorn.rb - Unicorn configuration for Nginx or Apache
+
+- **Template**
+      - templates/unicorn.rb.erb
+
+#### puma.rb - TODO
+
+----
+
+### Databases
+
+#### Generic (Sqlite)
 
 - database.rb: Manage DB yaml config for Rails
   - `database:setup` Generate the database.yml configuration file.
@@ -37,17 +110,8 @@ Recipes
   - **Template**
       - templates/database.yml.erb
 
-  
-- fast.rb 
-- logs.rb - Manage log/production.log file: tail and truncate
-- memcached.rb - refactor to use Chef
-  - **Template**
-      - templates/memcached.erb
-- nginx.rb - TODO: refactor install to use Chef
-  - **Template**
-      - templates/nginx.conf.erb
-    
-- nodejs.rb - TODO: refactor install to use Chef
+#### Postgres
+
 - postgresql.rb - Manage Postgres for Rails (namespace `:postgresql`)
   - `:install` - TODO: refactor install to use Chef
   - `:drop_database`
@@ -61,12 +125,36 @@ Recipes
   - `:production`
   - `:production_pre`
   - `:production_post`
-- puma.rb - TODO
-- rbenv.rb - TODO
-- setup.rb - Change ownership of the created directories at the setup stage
-  - `:deploy:chown_dirs` 
-- sudo.rb - Install sudo on the remote server. Do nothing if sudo installed.
-- talks.rb - TODO
-- unicorn.rb - Unicorn configuration for Nginx or Apache 
+
+#### Memcached
+
+- memcached.rb - TODO refactor to use Chef
   - **Template**
-      - templates/unicorn.rb.erb
+      - templates/memcached.erb
+
+
+----
+
+### Rails configuration
+
+- application_yml_file.rb - Manage config/application.yml file: concatenate example and secrets files
+
+----
+
+### Rails assets
+
+- Asset Precompile recipes - see {file:ASSETS_PRECOMPILE.md} for details
+  - assets_precompile.rb
+  - assets_precompile_conditional.rb
+  - assets_precompile_local.rb
+
+----
+
+
+### Others and deprecated
+
+- check.rb - deprecated
+- fast.rb
+- nodejs.rb - TODO: refactor install to use Chef
+- talks.rb - TODO
+
