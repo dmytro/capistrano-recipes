@@ -55,13 +55,7 @@ EOF
     options.merge! hosts: only_hosts if exists? :only_hosts
 
     unless chef_solo_bootstrap_skip
-      temp = %x{ mktemp /tmp/captemp-tar.XXXX }.chomp
-      
-      run_locally "cd #{chef_solo_path} && tar cfz  #{temp} --exclude ./tmp --exclude ./.git  . "
-      upload( temp, temp, :via => :sftp)
-      run_locally "rm -f #{temp}"
-      
-      run "mkdir -p #{chef_solo_remote} && cd #{chef_solo_remote} && tar xfz #{temp} && rm -f #{temp}", options
+      upload_dir chef_solo_path, chef_solo_remote, exclude: %w{./.git ./tmp}, options: options
       run "#{sudo} -i bash #{chef_solo_remote}/install.sh #{chef_solo_json}", options
     end
   end

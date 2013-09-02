@@ -68,3 +68,27 @@ def recipe name, local = false
   path = local ? "local_recipes" : "recipes"
   load File.expand_path("#{recipe_base}/#{path}/#{name.to_s}.rb")
 end
+
+##
+# Tar directory locally and send it to remote location, untarring
+#
+# @param local [String]
+#
+# @param remote [String]
+#
+# @apram exclude: [Array] list of local subdirectories, regexp's to
+#     exclude from tar'ing. Arguments to tar's --exclude command. By
+#     default always exclude .git subdirectory.
+#
+def upload_dir local, remote, options: {}, exclude: ["./.git"]
+  begin
+    temp = %x{ mktemp /tmp/captemp-tar.XXXX }.chomp
+    run_locally "cd #{local} && tar cfz #{temp} #{exclude.map { |e| "--exclude #{e}" }.join(' ')} ."
+    upload temp, temp
+    run "mkdir -p #{remote} && cd #{remote} && tar xfz #{temp}", options: options
+  ensure
+    run_locally "rm -f #{temp}"
+    run  "rm -f #{temp}"
+  end
+
+end
