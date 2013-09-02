@@ -35,8 +35,8 @@ def sudo_or_su(command)
     puts <<-EMSG
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Sudo is not installed (or not configured) 
-following commands will be executed with root password. 
+Sudo is not installed (or not configured)
+following commands will be executed with root password.
 
 #{command}
 
@@ -61,8 +61,23 @@ def test_command cmd
 end
 
 set_default :recipe_base, "lib"
+
+#
+# DSL extensions. Some functions to extend current Capistrano DSL with
+# ofthen used patterns.
+# ==================================================================
+
 ##
-# Load additional recipes from file. Extension for the DSL.
+# Load additional recipes from file.
+#
+# @param name [String,Symbol] name of the recipe file, symbolized,
+#     without .rb extension.
+#
+# @param local [Boolean] If `true` try to load recipe from
+#     `local_recipes` subdirectory. Otherwise use subdirectory
+#     `recipes`. Recipes is git submodule with generic recipes, while
+#     `local_recipes` is local subdirectory with collection of the
+#     recipes that are used only in the current project.
 #
 def recipe name, local = false
   path = local ? "local_recipes" : "recipes"
