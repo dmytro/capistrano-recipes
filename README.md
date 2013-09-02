@@ -62,13 +62,20 @@ Set variable conditionally.
 - chef_solo.rb - 2 tasks
   - `chefsolo:deploy` - Run chef-solo deploy on the remote server (bootstrap server)
   - `chefsolo:run_remote` - deploy single JSON chef-solo file
-- `chefsolo:roles` chef_solo_roles.rb - Deploy JSON file corresponding to role (uses `chefsolo:run_remote`)
+- `chef_solo_roles.rb`
+  - `chefsolo:roles` chef_solo_roles.rb - Deploy JSON file corresponding to role (uses `chefsolo:run_remote`)
 
 #### Puppet
 
 - puppet.rb
 
 Similar to chef-solo above. Bootstraps puppet and provide task to execute manifest remotely. Puppet recipe requires chef-solo bootstrap.
+
+#### HTTP Proxy
+
+- File: http_proxy.rb
+
+Setup HTTP proxy to access network via gateway server. HTTP server must have role `:proxy`, all other hosts configured as proxy clients.
 
 ----
 
