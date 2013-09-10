@@ -16,7 +16,7 @@ namespace :postgresql do
 
   desc "Install the latest stable release of PostgreSQL."
   task :install, roles: :db, only: {primary: true} do
-    run "#{sudo} add-apt-repository ppa:pitti/postgresql"
+#    run "#{sudo} add-apt-repository ppa:pitti/postgresql"
     run "#{sudo} apt-get -y update"
     run "#{sudo} apt-get -y install postgresql libpq-dev"
   end
@@ -58,7 +58,8 @@ namespace :postgresql do
   desc "Generate the database.yml configuration file."
   task :setup, roles: :app do
     if create_yaml
-      run "mkdir -p #{shared_path}/config"
+      try_sudo "mkdir -p #{shared_path}/config"
+      sudo "chown #{user} #{shared_path}/config"
       template "postgresql.yml.erb", "#{shared_path}/config/database.yml"
     else
       logger.info "Database was not created during the deploy, not updating database.yml file"
