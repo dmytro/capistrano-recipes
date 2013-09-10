@@ -100,10 +100,9 @@ def upload_dir local, remote, options: {}, exclude: ["./.git"]
     temp = %x{ mktemp /tmp/captemp-tar.XXXX }.chomp
     run_locally "cd #{local} && tar cfz #{temp} #{exclude.map { |e| "--exclude #{e}" }.join(' ')} ."
     upload temp, temp
-    run "mkdir -p #{remote} && cd #{remote} && tar xfz #{temp}", options: options
+    run "mkdir -p #{remote} && cd #{remote} && tar xfz #{temp}", options
   ensure
     run_locally "rm -f #{temp}"
-    run  "rm -f #{temp}"
+    run  "rm -f #{temp}", options
   end
-
 end
