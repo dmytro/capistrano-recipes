@@ -12,6 +12,7 @@ namespace :database do
   task :setup, roles: :app do
     if create_database_yaml
       run "#{try_sudo} mkdir -p #{shared_path}/config"
+      run "#{try_sudo} chown #{user} #{shared_path}/config"
       template "database.yml.erb", "#{shared_path}/config/database.yml"
     else
       logger.info "Configured to not create database.yml file"
