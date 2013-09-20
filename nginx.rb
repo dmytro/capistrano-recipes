@@ -4,13 +4,14 @@ set_default(:nginx_chrome_frame, true)
 set_default(:domain_name, "#{application}")
 
 namespace :nginx do
-  desc "Install latest stable release of nginx"
-  task :install, roles: :web do
-    run "#{try_sudo} add-apt-repository ppa:nginx/stable"
-    run "#{try_sudo} apt-get -y update"
-    run "#{try_sudo} apt-get -y install nginx"
-  end
-  after "deploy:install", "nginx:install"
+
+  # desc "Install latest stable release of nginx"
+  # task :install, roles: :web do
+  #   run "#{try_sudo} add-apt-repository ppa:nginx/stable"
+  #   run "#{try_sudo} apt-get -y update"
+  #   run "#{try_sudo} apt-get -y install nginx"
+  # end
+  # after "deploy:install", "nginx:install"
 
   desc "Setup nginx configuration for this application"
   task :setup, roles: :web do
@@ -34,5 +35,12 @@ namespace :nginx do
   desc "Restart nginx"
   task :restart, roles: :web do
     run "#{sudo} service nginx restart"
+  end
+
+  desc "Ensure Apache is not running in case it is installed"
+  task :apache_stop, roles: :web do
+    %w{ apache2 apache httpd }.each do |serv| # Dfferent names for apache in varios distros
+      sudo "service #{serv} stop || true"
+    end
   end
 end
