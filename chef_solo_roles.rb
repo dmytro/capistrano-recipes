@@ -18,11 +18,13 @@ EOF
 
   task :roles do 
 
+    json_path = exists?(:custom_chef_solo) ? custom_chef_solo : chef_solo_path
+
     servers = exists?(:only_hosts) ? Array(only_hosts) : find_servers_for_task(current_task)
     servers.each do |server|
       role_names_for_host(server).each do |role|
         file = "#{role.to_s}.json"
-        if File.exists? "#{chef_solo_path}/#{file}"
+        if File.exists? "#{json_path}/#{file}"
           parallel do |session|
             session.when "server.host == '#{server}'", "#{chef_solo_command} #{chef_solo_remote}/#{file}"
           end
