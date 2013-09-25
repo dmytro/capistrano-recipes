@@ -9,7 +9,7 @@ namespace :deploy do
   task :chown_dirs, :except => { :no_release => true } do 
     dirs = [deploy_to, releases_path, shared_path]
     dirs += shared_children.map { |d| File.join(shared_path, d.split('/').last) }
-    run "#{try_sudo} chown -R #{user} #{dirs.join(' ')}" if user
+    sudo "chown -R #{user} #{dirs.join(' ')}" if user
   end
 
   after "deploy:setup", "deploy:chown_dirs"
