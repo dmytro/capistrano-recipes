@@ -33,7 +33,7 @@ EOF
     end
   end
 
-  before "deploy", "chefsolo:roles"
-#  before "chefsolo:roles", "chefsolo:deploy"
   
 end
+
+before "chefsolo:roles", "chefsolo:deploy"

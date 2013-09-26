@@ -6,7 +6,7 @@ set_default :chef_solo_path,       File.expand_path("../chef-solo/", File.dirnam
 set_default :chef_solo_json,       "empty.json"
 set_default :chef_solo_remote,     "~#{user}/chef"
 set_default :chef_solo_command,    %Q{cd #{chef_solo_remote} && #{try_sudo} -i chef-solo --config #{chef_solo_remote}/solo.rb --json-attributes } 
-set_default  :chef_solo_bootstrap_skip, false
+set_default :chef_solo_bootstrap_skip, false
 
 namespace :chefsolo do 
 
@@ -54,9 +54,10 @@ EOF
     options = { shell: :bash, pty: true }
     options.merge! hosts: only_hosts if exists? :only_hosts
 
-    unless chef_solo_bootstrap_skip
+    unless chef_solo_bootstrap_skip || exists?(:chef_solo_bootstrap_ran)
       upload_dir chef_solo_path, chef_solo_remote, exclude: %w{./.git ./tmp}, options: options
       run "#{sudo} -i bash #{chef_solo_remote}/install.sh #{chef_solo_json}", options
+      set :chef_solo_bootstrap_ran, true # Make sure that deploy of chef-solo never runs twice
     end
   end
   
@@ -70,5 +71,6 @@ EOF
     run chef_solo_command + (json ? json : "empty.json")
   end
 
-  before "deploy", "chefsolo:deploy"
 end
+
+before "deploy", "chefsolo:deploy"
