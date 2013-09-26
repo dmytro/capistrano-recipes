@@ -27,19 +27,19 @@ namespace :nginx do
   %w[start stop].each do |command|
     desc "#{command} nginx"
     task command, roles: :web do
-      run "#{sudo} service nginx #{command}"
+      sudo "service nginx #{command}"
     end
     after "deploy:#{command}", "nginx:#{command}"
   end
 
   desc "Restart nginx"
   task :restart, roles: :web do
-    run "#{sudo} service nginx restart"
+    sudo "service nginx restart"
   end
 
   desc "Ensure Apache is not running in case it is installed"
   task :apache_stop, roles: :web do
-    %w{ apache2 apache httpd }.each do |serv| # Dfferent names for apache in varios distros
+    %w{ apache2 apache httpd }.each do |serv| # Different names for apache in varios distros
       sudo "service #{serv} stop || true"
     end
   end
