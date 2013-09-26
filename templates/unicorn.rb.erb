@@ -15,7 +15,7 @@ stdout_path "<%= unicorn_out_log %>"
 <% if unicorn_port %>
 listen <%= unicorn_port %>, :tcp_nopush => true
 <% end %>
-listen "<%= shared_path %>/config/unicorn.sock", :backlog => 64
+listen "<%= unicorn_socket %>", :backlog => 64
 
 
 # Unicorn worker processes
