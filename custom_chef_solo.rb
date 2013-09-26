@@ -13,13 +13,15 @@ namespace :chefsolo do
   desc "Copy custom configuration files to the remote host"
   task :custom do 
 
-    options = { shell: :bash, pty: true }
 
-    unless chef_solo_bootstrap_skip
+    options = { shell: :bash, pty: true }
+    unless chef_solo_bootstrap_skip ||  exists?(:custom_chef_solo_ran)
       upload_dir custom_chef_solo, chef_solo_remote, exclude: %w{./.git ./tmp}, options: options
+      set :custom_chef_solo_ran, true # Ensure it runs only once in each deploy
     end
   end
   
 end
 
-after "chefsolo:deploy", "chefsolo:custom"
+before "chefsolo:roles",  "chefsolo:custom"
+after  "chefsolo:deploy", "chefsolo:custom"
