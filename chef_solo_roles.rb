@@ -37,3 +37,4 @@ EOF
 end
 
 before "chefsolo:roles", "chefsolo:deploy"
+before "deploy", "chefsolo:roles"
