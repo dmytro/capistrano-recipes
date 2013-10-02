@@ -4,7 +4,47 @@ Capistrano recipes
 ======================
 
 
-This directory contains recipes to be used together with Capistrano. To use recipe in the deployment require needed file(s) from your `deploy.rb` file. **Note:** Do not automatically require all files. Some recipes implement same functionally differently depending on your requirements.
+This directory contains recipes to be used together with Capistrano. To use recipe in the deployment require needed file(s) from your `deploy.rb` file. 
+
+**Note:** Do not automatically require all files. Some recipes implement same functionally differently depending on your requirements.
+
+
+Description
+-----------
+
+Many cookbooks here are heavily modified after forking from original author. Main idea for new functionality is to provide means of integrating Capistrano with Chef-solo, where Capistrano is used for application deployment, and Chef is used for all infrastructure related tasks: bootstraping servers, installing software, etc.
+
+This repository is closely related to another one (dmytro/chef-solo) and tested with it.
+
+### Integration with chef-solo
+
+#### Boostraping server
+
+TBD 
+
+#### Chef-solo roles and Capistrano roles
+
+TBD 
+
+#### Custom chef-solo setup
+
+TBD 
+
+#### Using Chef databags 
+
+It is possible to use Chef databags in Capistrano recipes. Databags are loaded from either custom Chef-solo path or from standard one. If custom path is defined (variable `:custom_chef_solo` defined when recipe `custom_chef_solo` is loaded), then custom path is used.
+
+* Example (see recipe mysql.rb):
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    root_password = get_data_bag(:users, "mysql")["root_password"]
+    set :database, get_data_bag(:application, "database")
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Limitations
+  - Databags are loaded on the local server, which means that node attributes are not known.
+  - No search functionality, only load
+
 
 Recipes
 -----------

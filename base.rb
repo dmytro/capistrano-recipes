@@ -1,3 +1,25 @@
+require 'chef/knife'
+require 'chef/application/solo'
+require 'chef/data_bag_item'
+
+##
+# Read databag on local host, using custom directory if it is defined.
+#
+def get_data_bag bag, item=nil
+  Chef::Config[:solo] = true
+  Chef::Config[:data_bag_path] = "#{(exists?(:custom_chef_solo) ? custom_chef_solo : chef_solo_path)}/data_bags"
+
+  if item
+    Chef::DataBagItem.load(bag, item.to_s).raw_data
+  else
+    Chef::DataBag.load(bag)
+  end
+
+end
+
+##
+# Parse ERB template from tempaltes directory and upload to target server.
+#
 def template(from, to)
   erb = File.read(File.expand_path("../templates/#{from}", __FILE__))
   put ERB.new(erb,0,'<>%-').result(binding), to
