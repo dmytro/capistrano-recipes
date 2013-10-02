@@ -14,7 +14,7 @@ namespace :nginx do
   # after "deploy:install", "nginx:install"
 
   desc "Setup nginx configuration for this application"
-  task :setup, roles: :web do
+  task :setup, except: { no_release: true } do
     template "nginx.conf.erb", "/tmp/nginx_conf"
     run "#{try_sudo} mkdir -p #{shared_path}/config"
     run "#{try_sudo} cp /tmp/nginx_conf #{shared_path}/config/nginx.conf"
@@ -26,19 +26,19 @@ namespace :nginx do
 
   %w[start stop].each do |command|
     desc "#{command} nginx"
-    task command, roles: :web do
+    task command, except: { no_release: true }  do
       sudo "service nginx #{command}"
     end
     after "deploy:#{command}", "nginx:#{command}"
   end
 
   desc "Restart nginx"
-  task :restart, roles: :web do
+  task :restart, except: { no_release: true } do
     sudo "service nginx restart"
   end
 
   desc "Ensure Apache is not running in case it is installed"
-  task :apache_stop, roles: :web do
+  task :apache_stop, except: { no_release: true }  do
     %w{ apache2 apache httpd }.each do |serv| # Different names for apache in varios distros
       sudo "service #{serv} stop || true"
     end

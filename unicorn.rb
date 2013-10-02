@@ -13,7 +13,7 @@ namespace :unicorn do
   namespace :init_d do
 
     desc "Install /etc/init.d file for Unicorn"
-    task :install do
+    task :install, roles: :web, except: { no_release: true } do
       template "unicorn.init.erb", "/tmp/unicorn.init"
       run "#{sudo} mv /tmp/unicorn.init /etc/init.d/unicorn"
     end
@@ -26,13 +26,13 @@ namespace :unicorn do
   unicorn_running = "( test -f #{unicorn_pid} && ps $(cat #{unicorn_pid}) > /dev/null ) ; echo $? "
 
   desc "Setup Unicorn initializer and app configuration"
-  task :setup, roles: :app do
+  task :setup, except: { no_release: true } do
     run "mkdir -p #{shared_path}/config"
   end
   after "deploy:setup", "unicorn:setup"
 
   desc "Generate and copy unicorn config"
-  task :copy do
+  task :copy, roles: :web, except: { no_release: true }  do
     template "unicorn.rb.erb", unicorn_config
   end
   before "unicorn:symlink", "unicorn:copy"
@@ -40,7 +40,7 @@ namespace :unicorn do
 
 
   desc "Symlink unicorn config"
-  task :symlink do
+  task :symlink, roles: :web, except: { no_release: true }  do
     run "ln -nfs #{unicorn_config} #{release_path}/config/unicorn.rb"
   end
   after "deploy:finalize_update", "unicorn:symlink"
@@ -58,7 +58,7 @@ namespace :unicorn do
   after "deploy:stop", "unicorn:stop"
 
   desc "Reload Unicorn"
-  task :reload, roles: :app do
+  task :reload, roles: :web, except: { no_release: true }  do
 
     running = ( capture(unicorn_running).strip == '0')
     
@@ -72,7 +72,7 @@ namespace :unicorn do
   end
 
   desc "Restart unicorn"
-  task :restart, roles: :app do
+  task :restart, roles: :web, except: { no_release: true }  do
 
     running = ( capture(unicorn_running).strip == '0')
     
