@@ -1,3 +1,4 @@
+set_default :chef_solo_roles_skip, false
 
 namespace :chefsolo do
 
@@ -14,19 +15,26 @@ role :web, web01.example.com
 this recipe will deploy role `db.json` to db01 and `web.json` to
 web01.
 
+Configuration:
+
+- To skip infra roles process use: cap -s chef_solo_roles_skip=true ...
 EOF
 
   task :roles do 
 
-    json_path = exists?(:custom_chef_solo) ? custom_chef_solo : chef_solo_path
+    unless chef_solo_roles_skip
 
-    servers = exists?(:only_hosts) ? Array(only_hosts) : find_servers_for_task(current_task)
-    servers.each do |server|
-      role_names_for_host(server).each do |role|
-        file = "#{role.to_s}.json"
-        if File.exists? "#{json_path}/#{file}"
-          parallel do |session|
-            session.when "server.host == '#{server}'", "#{chef_solo_command} #{chef_solo_remote}/#{file}"
+      json_path = exists?(:custom_chef_solo) ? custom_chef_solo : chef_solo_path
+      
+      # TODO: Currently this runs sequentially, can be made to run in parallel, using hosts: attribute for `run`.
+      servers = exists?(:only_hosts) ? Array(only_hosts) : find_servers_for_task(current_task)
+      servers.each do |server|
+        role_names_for_host(server).each do |role|
+          file = "#{role.to_s}.json"
+          if File.exists? "#{json_path}/#{file}"
+            parallel do |session|
+              session.when "server.host == '#{server}'", "#{chef_solo_command} #{chef_solo_remote}/#{file}"
+            end
           end
         end
       end
