@@ -1,6 +1,7 @@
 require 'chef/knife'
 require 'chef/application/solo'
 require 'chef/data_bag_item'
+require 'pathname'
 
 ##
 # Read databag on local host, using custom directory if it is defined.
@@ -15,6 +16,13 @@ def get_data_bag bag, item=nil
     Chef::DataBag.load(bag)
   end
 
+end
+
+##
+# Return relative path to the recipe file. Use in recipe documentation.
+#
+def path_to file
+  Pathname.new(file).relative_path_from(Pathname.new(ENV['PWD'])).to_s
 end
 
 ##
