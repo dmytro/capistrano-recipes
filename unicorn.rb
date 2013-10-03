@@ -8,7 +8,10 @@ set_default(:unicorn_err_log) { "#{shared_path}/log/unicorn.stderr.log" }
 set_default(:unicorn_out_log) { "#{shared_path}/log/unicorn.stdout.log" }
 set_default(:unicorn_port) { 5000 } # For use with Apache since Apache can't listen on socket.
 
+puts "ENV #{rails_env} #{fetch(:rails_env)}"
+
 namespace :unicorn do
+
 
   namespace :init_d do
 
@@ -19,11 +22,6 @@ namespace :unicorn do
     end
   end
 
-  start_unicorn  = "(cd #{current_path} && bundle exec unicorn -E #{rails_env} -c #{current_path}/config/unicorn.rb -D)"
-  reload_unicorn = "( kill -s USR2 `cat #{unicorn_pid}` || true )"
-  stop_unicorn = "( kill `cat #{unicorn_pid}` || true )"
-
-  unicorn_running = "( test -f #{unicorn_pid} && ps $(cat #{unicorn_pid}) > /dev/null ) ; echo $? "
 
   desc "Setup Unicorn initializer and app configuration"
   task :setup, except: { no_release: true } do
@@ -45,45 +43,34 @@ namespace :unicorn do
   end
   after "deploy:finalize_update", "unicorn:symlink"
 
+  desc "[internal] Set variables"
+  task :variables do
+    # Need to run this in task - variables are task-level namespaced
+    set :unicorn_start,   "(echo '*** Starting Unicorn'; cd #{current_path} && bundle exec unicorn -E #{rails_env} -c #{current_path}/config/unicorn.rb -D)"
+    set :unicorn_reload,  "(echo '*** Reloading Unicorn'; kill -s USR2 `cat #{unicorn_pid}`)"
+    set :unicorn_stop,    "(echo '*** Stopping Unicorn'; kill `cat #{unicorn_pid}`)"
+    set :unicorn_running, "(test -f #{unicorn_pid} && ps $(cat #{unicorn_pid}) > /dev/null)"
+  end
+
+
   desc "Start Unicorn"
   task :start, :except => { :no_release => true } do
-    run start_unicorn
+    run unicorn_start
   end
-  after "deploy:start", "unicorn:start"
 
   desc "Stop Unicorn"
   task :stop, :except => { :no_release => true } do
-    run "kill -s QUIT `cat #{unicorn_pid}`"
+    run unicorn_stop
   end
-  after "deploy:stop", "unicorn:stop"
 
   desc "Reload Unicorn"
   task :reload, roles: :web, except: { no_release: true }  do
-
-    running = ( capture(unicorn_running).strip == '0')
-    
-    if running
-      logger.info "Reloading Unicorn"
-      run reload_unicorn
-    else
-      logger.info "Unicorn is not running. Starting."
-      run start_unicorn
-    end
+    run "if #{unicorn_running}; then #{unicorn_reload}; else #{unicorn_start}; fi"
   end
 
   desc "Restart unicorn"
   task :restart, roles: :web, except: { no_release: true }  do
-
-    running = ( capture(unicorn_running).strip == '0')
-    
-    if running
-      logger.info "Reloading Unicorn"
-      run stop_unicorn
-      run start_unicorn
-    else
-      logger.info "Unicorn is not running. Starting."
-      run start_unicorn
-    end
+    run "if #{unicorn_running}; then #{unicorn_stop}; fi; #{unicorn_start}"
   end
 
   namespace :logs do 
@@ -105,3 +92,11 @@ namespace :unicorn do
 end
 
 end
+
+before "unicorn:reload", "unicorn:variables"
+before "unicorn:start", "unicorn:variables"
+before "unicorn:restart", "unicorn:variables"
+after "deploy:start", "unicorn:start"
+after "deploy:stop", "unicorn:stop"
+
+
