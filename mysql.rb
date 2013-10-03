@@ -33,7 +33,7 @@ DESC
   end
 
   desc <<-DESC
-  Generate and install `config/database.yml` file
+  Generate and install `config/database.yml` file.
 
   Configuration
   -------------
@@ -42,7 +42,6 @@ DESC
     name defained by :mysql_databag_file variable; by default
     :mysql_databag_file is set to `database`. Change it to match your
     environment configuration properly.
-
 
   * set :database_yml_create, false - prevent from generating file.
 
