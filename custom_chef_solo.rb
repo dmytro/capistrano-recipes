@@ -18,7 +18,7 @@ namespace :chefsolo do
 
   set `-S custom_chef_solo_skip=true` to skip execution of this task.
 
-  Source file: #{File.basename(__FILE__)}
+  Source file: #{path_to __FILE__}
 
 DESC
 

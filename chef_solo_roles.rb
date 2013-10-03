@@ -19,7 +19,7 @@ Configuration:
 
 - To skip infra roles process use: cap -s chef_solo_roles_skip=true ...
 
-Source File #{File.basename __FILE__}
+Source File #{path_to __FILE__}
 
 EOF
 

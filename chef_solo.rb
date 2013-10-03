@@ -45,7 +45,7 @@ namespace :chefsolo do
 
   set `-S chef_solo_bootstrap_skip=true` to skip execution of this task.
 
-  Source File #{File.basename __FILE__}
+  Source File #{path_to __FILE__}
 
 EOF
   task :deploy do
