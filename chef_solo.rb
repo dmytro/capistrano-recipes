@@ -46,6 +46,7 @@ namespace :chefsolo do
 
         cap deploy -s chef_solo_bootstrap_skip=true
 
+   Source File #{File.basename __FILE__}
 
 EOF
   task :deploy do
@@ -54,7 +55,7 @@ EOF
     options = { shell: :bash, pty: true }
     options.merge! hosts: only_hosts if exists? :only_hosts
 
-    unless chef_solo_bootstrap_skip || exists?(:chef_solo_bootstrap_ran)
+    unless exists?(:chef_solo_bootstrap_ran)
       upload_dir chef_solo_path, chef_solo_remote, exclude: %w{./.git ./tmp}, options: options
       run "#{sudo} -i bash #{chef_solo_remote}/install.sh #{chef_solo_json}", options
       set :chef_solo_bootstrap_ran, true # Make sure that deploy of chef-solo never runs twice
@@ -73,4 +74,4 @@ EOF
 
 end
 
-before "deploy", "chefsolo:deploy"
+before "deploy", "chefsolo:deploy" unless fetch(:chef_solo_bootstrap_skip, true)

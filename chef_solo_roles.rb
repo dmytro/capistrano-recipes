@@ -18,31 +18,36 @@ web01.
 Configuration:
 
 - To skip infra roles process use: cap -s chef_solo_roles_skip=true ...
+
+Source File #{File.basename __FILE__}
+
 EOF
 
   task :roles do 
 
-    unless chef_solo_roles_skip
-
-      json_path = exists?(:custom_chef_solo) ? custom_chef_solo : chef_solo_path
-      
-      # TODO: Currently this runs sequentially, can be made to run in parallel, using hosts: attribute for `run`.
-      servers = exists?(:only_hosts) ? Array(only_hosts) : find_servers_for_task(current_task)
-      servers.each do |server|
-        role_names_for_host(server).each do |role|
-          file = "#{role.to_s}.json"
-          if File.exists? "#{json_path}/#{file}"
-            parallel do |session|
-              session.when "server.host == '#{server}'", "#{chef_solo_command} #{chef_solo_remote}/#{file}"
-            end
+    json_path = exists?(:custom_chef_solo) ? custom_chef_solo : chef_solo_path
+    
+    # TODO: Currently this runs sequentially, can be made to run in parallel, using hosts: attribute for `run`.
+    servers = exists?(:only_hosts) ? Array(only_hosts) : find_servers_for_task(current_task)
+    servers.each do |server|
+      role_names_for_host(server).each do |role|
+        file = "#{role.to_s}.json"
+        if File.exists? "#{json_path}/#{file}"
+          parallel do |session|
+            session.when "server.host == '#{server}'", "#{chef_solo_command} #{chef_solo_remote}/#{file}"
           end
         end
       end
     end
-  end
+  end                           # :roles
 
-  
+  desc "Stop after executing chefsolo:roles"
+  task :no_release do
+    logger.info "Infra deployed. Stopping on user request."
+    exit
+  end
 end
 
-before "chefsolo:roles", "chefsolo:deploy"
-before "deploy", "chefsolo:roles"
+after  "chefsolo:roles", "chefsolo:no_release" if fetch(:infra_only, true)
+before "chefsolo:roles", "chefsolo:deploy" unless fetch(:chef_solo_roles_skip, true)
+before "deploy", "chefsolo:roles"          unless fetch(:chef_solo_roles_skip, true)
