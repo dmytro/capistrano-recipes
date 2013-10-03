@@ -16,7 +16,7 @@ namespace :unicorn do
   namespace :init_d do
 
     desc <<-DESC
- Install /etc/init.d file for Unicorn
+ Install /etc/init.d file for Unicorn.
   
   Source file: #{path_to __FILE__} 
 
@@ -29,7 +29,7 @@ DESC
 
 
   desc <<-DESC
- Setup Unicorn initializer and app configuration
+ Setup Unicorn initializer and app configuration.
   
   Source file: #{path_to __FILE__} 
 
@@ -40,7 +40,7 @@ DESC
   after "deploy:setup", "unicorn:setup"
 
   desc <<-DESC
- Generate and copy unicorn config
+ Generate and copy unicorn config.
   
   Source file: #{path_to __FILE__} 
 
@@ -53,7 +53,7 @@ DESC
 
 
   desc <<-DESC
- Symlink unicorn config
+ Symlink unicorn config.
   
   Source file: #{path_to __FILE__} 
 
@@ -79,8 +79,8 @@ DESC
 
 
   desc <<-DESC
- Start Unicorn
-  
+ Start Unicorn.
+
   Source file: #{path_to __FILE__} 
 
 DESC
@@ -89,7 +89,7 @@ DESC
   end
 
   desc <<-DESC
- Stop Unicorn
+ Stop Unicorn.
   
   Source file: #{path_to __FILE__} 
 
@@ -99,9 +99,12 @@ DESC
   end
 
   desc <<-DESC
- Reload Unicorn
-  
-  Source file: #{path_to __FILE__} 
+ Reload Unicorn.
+
+This will send `kill -USR2` to Unicorn master which allows for
+no-downtime reloadds of all unicorn children processes.
+
+Source file: #{path_to __FILE__}
 
 DESC
   task :reload, roles: :web, except: { no_release: true }  do
@@ -109,7 +112,7 @@ DESC
   end
 
   desc <<-DESC
- Restart unicorn
+ Restart unicorn.
   
   Source file: #{path_to __FILE__} 
 
@@ -121,7 +124,7 @@ DESC
   namespace :logs do 
     
     desc <<-DESC
- Tail Unicorn logs
+ Tail Unicorn logs.
   
   Source file: #{path_to __FILE__} 
 
@@ -136,7 +139,7 @@ DESC
     end
     
     desc <<-DESC
- Clear all Unicorn logs
+ Clear all Unicorn logs.
   
   Source file: #{path_to __FILE__} 
 
