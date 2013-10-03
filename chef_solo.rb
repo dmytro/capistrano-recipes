@@ -40,13 +40,12 @@ namespace :chefsolo do
       Remote command to execute chef-solo.  Use it as: `run
       chef_solo_command + 'empty.json'` in your recipes.
 
-    Command line option
-    ----------------------
-    If you want to skip bootstrapping for the current run execute as:
+  Configuration 
+  -------------
 
-        cap deploy -s chef_solo_bootstrap_skip=true
+  set `-S chef_solo_bootstrap_skip=true` to skip execution of this task.
 
-   Source File #{File.basename __FILE__}
+  Source File #{File.basename __FILE__}
 
 EOF
   task :deploy do

@@ -10,8 +10,13 @@ namespace :chefsolo do
 
   This will copy custom configuration to the remote host into the same
   directory  where chef-solo  is installed,  therefore adding  messing
-  files  or   overwriting  files   that  already  exist   in  chef-sol
+  files  or   overwriting  files   that  already  exist   in  chef-solo
   repository.
+
+  Configuration 
+  -------------
+
+  set `-S custom_chef_solo_skip=true` to skip execution of this task.
 
   Source file: #{File.basename(__FILE__)}
 
