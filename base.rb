@@ -28,9 +28,13 @@ end
 ##
 # Parse ERB template from tempaltes directory and upload to target server.
 #
-def template(from, to)
-  erb = File.read(File.expand_path("../templates/#{from}", __FILE__))
-  put ERB.new(erb,0,'<>%-').result(binding), to
+# @param [File] __file__ - if not provided then templates are assumed
+#     to be in ../templates directory relative to this file, otherwise
+#     in the same directory relative to the __file__ parameter.
+#
+def template(from, to, __file__=nil, options: {})
+  erb = File.read(File.expand_path("../templates/#{from}", __file__ || __FILE__))
+  put ERB.new(erb,0,'<>%-').result(binding), to, options
 end
 
 def set_default(name, *args, &block)
