@@ -21,7 +21,7 @@ DESC
 
     set :hosts, (find_servers(:roles => [:web, :app, :db]) << 'localhost')
     root_password = get_data_bag(:users, "mysql")["root_password"]
-    set :database, get_data_bag(:application, "database")
+    set :database, get_data_bag(:application, mysql_databag_file)
 
     begin
       template "mysql/mysql_createdb.sql.erb", sql
@@ -57,9 +57,7 @@ DESC
 DESC
 
   task :database_yml, roles: [:db, :app, :web], :on_no_matching_servers => :continue do
-
     set :database, get_data_bag(:application, mysql_databag_file)
-
     template "mysql/database.yml.erb", "#{shared_path}/config/database.yml"
   end
 
