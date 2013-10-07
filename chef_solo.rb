@@ -1,14 +1,14 @@
 #
 # @author Dmytro Kovalov, dmytro.kovalov@gmail.com
-# 
+#
 
 set_default :chef_solo_path,       File.expand_path("../chef-solo/", File.dirname(__FILE__))
 set_default :chef_solo_json,       "empty.json"
 set_default :chef_solo_remote,     "~#{user}/chef"
-set_default :chef_solo_command,    %Q{cd #{chef_solo_remote} && #{try_sudo} -i chef-solo --config #{chef_solo_remote}/solo.rb --json-attributes } 
+set_default :chef_solo_command,    %Q{cd #{chef_solo_remote} && #{try_sudo} -i chef-solo --config #{chef_solo_remote}/solo.rb --json-attributes }
 set_default :chef_solo_bootstrap_skip, false
 
-namespace :chefsolo do 
+namespace :chefsolo do
 
   desc <<-EOF
    Run chef-solo deploy on the remote server.
@@ -19,19 +19,28 @@ namespace :chefsolo do
    Configuration and defaults
    --------------------------
 
-    * set :chef_solo_path, <PATH> 
+    * set :chef_solo_path, <PATH>
 
       Local PATH to the directory where, chef-solo is installed. By
-      default searched in ./config/deploy/chef-solo
+      default searched in ../chef-solo/
 
     * set :chef_solo_json, "empty.json"
 
       JSON configuration for Chef solo to deploy. Defaults to
       empty.json
 
+    * set :custom_chef_solo, File.expand_path (...)
+
+      Full path to the directory with custom chef-solo configuration.
+      If set recipe will copy custom configuration to the remote host
+      into the same directory where chef-solo is installed, therefore
+      adding or overwriting files in chef-solo repository.
+
+      Default: not set
+
     * set_default :chef_solo_remote,     "~/chef"
 
-      Remote localtion where chef-solo is installed. By default in
+      Remote location where chef-solo is installed. By default in
       ~/chef directory of remote user.
 
     * set_default :chef_solo_command, \
@@ -40,7 +49,7 @@ namespace :chefsolo do
       Remote command to execute chef-solo.  Use it as: `run
       chef_solo_command + 'empty.json'` in your recipes.
 
-  Configuration 
+  Configuration
   -------------
 
   set `-S chef_solo_bootstrap_skip=true` to skip execution of this task.
@@ -56,12 +65,17 @@ EOF
 
     unless exists?(:chef_solo_bootstrap_ran)
       upload_dir chef_solo_path, chef_solo_remote, exclude: %w{./.git ./tmp}, options: options
+
+      if exists?(:custom_chef_solo) && Dir.exists?(custom_chef_solo)
+        upload_dir custom_chef_solo, chef_solo_remote, exclude: %w{./.git ./tmp}, options: options
+      end
+
       run "#{sudo} -i bash #{chef_solo_remote}/install.sh #{chef_solo_json}", options
       set :chef_solo_bootstrap_ran, true # Make sure that deploy of chef-solo never runs twice
     end
   end
-  
-  desc "Run chef-solo caommand remotely. Specify JSON file as: -s json=<file>"
+
+  desc "Run chef-solo command remotely. Specify JSON file as: -s json=<file>"
   task :run_remote do
 
     # Limit execution to only hosts in the list if list provided
