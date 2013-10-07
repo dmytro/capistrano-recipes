@@ -59,6 +59,7 @@ DESC
   task :database_yml, roles: [:db, :app, :web], :on_no_matching_servers => :continue do
     set :database, get_data_bag(:application, mysql_databag_file)
     template "mysql/database.yml.erb", "#{shared_path}/config/database.yml"
+    try_sudo "ln -nfs #{shared_path}/config/database.yml #{release_path}/config/"
   end
 
 end
