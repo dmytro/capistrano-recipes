@@ -24,23 +24,18 @@ Source File #{path_to __FILE__}
 EOF
 
   task :roles do 
-
     json_path = exists?(:custom_chef_solo) ? custom_chef_solo : chef_solo_path
     
-    # TODO: Currently this runs sequentially, can be made to run in parallel, using hosts: attribute for `run`.
-    servers = exists?(:only_hosts) ? Array(only_hosts) : find_servers_for_task(current_task)
-    servers.each do |server|
-      role_names_for_host(server).each do |role|
-        file = "#{role.to_s}.json"
-        if File.exists? "#{json_path}/#{file}"
-          parallel do |session|
-            session.when "server.host == '#{server}'", "#{chef_solo_command} #{chef_solo_remote}/#{file}"
-          end
-        end
-      end
+    roles = find_servers_for_task(current_task).map do |current_server|
+      role_names_for_host(current_server)
+    end.flatten.uniq
+    
+    roles.each do |role|
+      file = "#{role.to_s}.json"
+      run "#{chef_solo_command} #{chef_solo_remote}/#{file}", :roles => [role] if File.exists? "#{json_path}/#{file}"
     end
   end                           # :roles
-
+  
   desc "Stop after executing chefsolo:roles"
   task :no_release do
     logger.info "Infra deployed. Stopping on user request."
