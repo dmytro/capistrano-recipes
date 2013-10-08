@@ -8,8 +8,6 @@ set_default(:unicorn_err_log) { "#{shared_path}/log/unicorn.stderr.log" }
 set_default(:unicorn_out_log) { "#{shared_path}/log/unicorn.stdout.log" }
 set_default(:unicorn_port) { 5000 } # For use with Apache since Apache can't listen on socket.
 
-puts "ENV #{rails_env} #{fetch(:rails_env)}"
-
 namespace :unicorn do
 
 

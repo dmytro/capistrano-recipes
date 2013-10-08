@@ -25,7 +25,7 @@ EOF
 
   task :roles do 
     json_path = exists?(:custom_chef_solo) ? custom_chef_solo : chef_solo_path
-    
+
     roles = find_servers_for_task(current_task).map do |current_server|
       role_names_for_host(current_server)
     end.flatten.uniq
