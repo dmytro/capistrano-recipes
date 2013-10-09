@@ -32,6 +32,7 @@ EOF
     
     roles.each do |role|
       file = "#{role.to_s}.json"
+      logger.important "Deploying role #{role}"
       run "#{chef_solo_command} #{chef_solo_remote}/#{file}", :roles => [role] if File.exists? "#{json_path}/#{file}"
     end
   end                           # :roles
