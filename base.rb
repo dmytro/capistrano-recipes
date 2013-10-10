@@ -39,8 +39,8 @@ def template(from, to, __file__=nil, options: {})
     begin
       temp = "/tmp/template_#{from.gsub("/","_")}.temp"
       put ERB.new(erb,0,'<>%-').result(binding), temp, options
-      sudo "mv #{temp} #{to}", hosts: options[:hosts]
-      sudo "chown #{remote_user} #{to}", hosts: options[:hosts]
+      sudo "mv #{temp} #{to}", options
+      sudo "chown #{remote_user} #{to}", options
     ensure
       sudo "rm -f #{temp}"
     end
