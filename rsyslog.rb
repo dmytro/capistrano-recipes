@@ -29,11 +29,37 @@ DESC
       template "rsyslog/udp_receiver.conf.erb", "/etc/rsyslog.d/udp_receiver.conf", options: { as: 'root', hosts: loggers}
       template "rsyslog/remote_logger.conf.erb", "/etc/rsyslog.d/remote_logger.conf", options: { as: 'root', hosts: clients}
 
-      sudo "/etc/init.d/rsyslog restart"
     else
       logger.important "**** Remote logger is not defined. Not configuring rsyslog."
     end
   end
-end
 
+    desc <<-DESC
+Install remote rsyslog configuration for Nginx.
+
+This task does not have callbacks configured. You need to include
+callback in your deploy.rb file explicitly to use it:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+after "rsyslog:setup", "rsyslog:nginx"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Source #{path_to __FILE__}
+
+DESC
+  task :nginx do
+    template "rsyslog/nginx.conf.erb", "/etc/rsyslog.d/10-nginx.conf", options: { as: 'root'}
+  end
+
+  desc <<-DESC
+Restart rsyslog at the end of deployment.
+
+Source #{path_to __FILE__}
+
+DESC
+  task :restart do 
+    sudo "/etc/init.d/rsyslog restart"
+  end
+end
 after "deploy:setup", "rsyslog:setup"
+after "deploy", "rsyslog:restart"
