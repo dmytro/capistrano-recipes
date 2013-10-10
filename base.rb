@@ -34,7 +34,19 @@ end
 #
 def template(from, to, __file__=nil, options: {})
   erb = File.read(File.expand_path("../templates/#{from}", __file__ || __FILE__))
-  put ERB.new(erb,0,'<>%-').result(binding), to, options
+  remote_user = options.delete :as
+  if remote_user
+    begin
+      temp = "/tmp/template_#{from.gsub("/","_")}.temp"
+      put ERB.new(erb,0,'<>%-').result(binding), temp, options
+      sudo "mv #{temp} #{to}", hosts: options[:hosts]
+      sudo "chown #{remote_user} #{to}", hosts: options[:hosts]
+    ensure
+      sudo "rm -f #{temp}"
+    end
+  else
+    put ERB.new(erb,0,'<>%-').result(binding), to, options
+  end
 end
 
 def set_default(name, *args, &block)
