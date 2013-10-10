@@ -1,0 +1,11 @@
+#
+# Provides UDP syslog reception
+#
+$ModLoad imudp
+$UDPServerRun 514
+
+#
+# Log everything from remote hosts into file by hostname
+#
+$template HOSTSLOG,"/var/log/hosts/%HOSTNAME%.log"
+*.* -?HOSTSLOG
