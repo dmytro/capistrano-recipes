@@ -61,5 +61,12 @@ DESC
     sudo "/etc/init.d/rsyslog restart"
   end
 end
+
+#
+# Only restart if rsyslog config changed.
+#
+on :start, :only => ["rsyslog:setup", "rsyslog:nginx"] do
+  on :finish, "rsyslog:restart"
+end
+
 after "deploy:setup", "rsyslog:setup"
-after "deploy", "rsyslog:restart"
