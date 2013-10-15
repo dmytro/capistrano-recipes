@@ -1,5 +1,8 @@
-
-
+set_default :per_host_rsyslog_file, "/var/log/hosts/%HOSTNAME%.log"
+set_default :all_hosts_rsyslog_file, "/var/log/hosts/all-hosts.log"
+#
+#
+# ==================================================================
 namespace :rsyslog do 
 
   desc <<-DESC
@@ -13,6 +16,29 @@ IP address or hostname of the logger host(s) is added on clinets to
 forward logs to. On the server side UDP listener is configured, and
 logs from server are stored in `/var/log/hosts/<HOSTNAME>.log` file
 for each host.
+
+Configuration
+--------------
+
+* :per_host_rsyslog_file - Filename for logging from remote hosts into
+   file by hostname "/var/log/hosts/%HOSTNAME%.log". See templates for
+   Rsyslog for more information. Set this variable to false to disable
+   per host log file.
+
+Default
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+set_default :per_host_rsyslog_file, "/var/log/hosts/%HOSTNAME%.log"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* all_hosts_rsyslog_file - Same as above, but log everything into
+   single file for the sake of easier uploading logs to, for example
+   S3, using Fluentd.
+
+Default
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+set_default :all_hosts_rsyslog_file, "/var/log/hosts/all-hosts.log"
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 Source #{path_to __FILE__}
 Templates:
