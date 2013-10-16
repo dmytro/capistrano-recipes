@@ -67,7 +67,7 @@ Ensure Apache is not running in case it is installed.
 
 Source #{path_to __FILE__}
 DESC
-  task :apache_stop, roles: [:app, :web], except: { no_release: true }  do
+  task :apache_stop, roles: [:app, :web], except: { no_release: true }, :on_no_matching_servers => :continue  do
     %w{ apache2 apache httpd }.each do |serv| # Different names for apache in varios distros
       sudo "service #{serv} stop || true"
     end
