@@ -5,7 +5,7 @@
 set_default :chef_solo_path,       File.expand_path("../chef-solo/", File.dirname(__FILE__))
 set_default :chef_solo_json,       "empty.json"
 set_default :chef_solo_remote,     "~#{user}/chef"
-set_default :chef_solo_command,    %Q{cd #{chef_solo_remote} && #{try_sudo} -i chef-solo --config #{chef_solo_remote}/solo.rb --json-attributes }
+set_default :chef_solo_command,    %Q{cd #{chef_solo_remote} && #{try_sudo} chef-solo --config #{chef_solo_remote}/solo.rb --json-attributes }
 set_default :chef_solo_bootstrap_skip, false
 
 namespace :chefsolo do
@@ -43,7 +43,7 @@ namespace :chefsolo do
       Remote location where chef-solo is installed. By default in
       ~/chef directory of remote user.
 
-    * set_default :chef_solo_command, \
+    * set_default :chef_solo_command, \\
       %Q{cd #{chef_solo_remote} && #{try_sudo} chef-solo --config #{chef_solo_remote}/solo.rb --json-attributes }
 
       Remote command to execute chef-solo.  Use it as: `run
@@ -53,6 +53,24 @@ namespace :chefsolo do
   -------------
 
   set `-S chef_solo_bootstrap_skip=true` to skip execution of this task.
+
+  RVM 
+  ----- 
+
+  In case chef-solo is not found or can't initiaize environment
+  properly when used with sudo, use rvmsudo instead. You also
+  prbably'd need to set rvmsudo_secure_path and PATH, some commands
+  are failing when started from /usr/bin/env
+
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  set :sudo, 'rvmsudo'
+
+  set :default_environment, {
+      'rvmsudo_secure_path' => 1,
+      'PATH' => '/usr/local/rvm/gems/ruby-2.0.0-p247/bin: \\
+       /usr/local/rvm/gems/ruby-2.0.0-p247@global/bin:\\
+       /usr/local/rvm/bin:/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin',
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
   Source File #{path_to __FILE__}
 
@@ -70,7 +88,7 @@ EOF
         upload_dir custom_chef_solo, chef_solo_remote, exclude: %w{./.git ./tmp}, options: options
       end
 
-      run "#{sudo} -i bash #{chef_solo_remote}/install.sh #{chef_solo_json}", options
+      run "#{sudo} bash #{chef_solo_remote}/install.sh #{chef_solo_json}", options
       set :chef_solo_bootstrap_ran, true # Make sure that deploy of chef-solo never runs twice
     end
   end
