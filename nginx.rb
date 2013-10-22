@@ -5,15 +5,9 @@ set_default(:domain_name, "#{application}")
 set_default(:nginx_access_log, "#{shared_path}/log/nginx_#{application}_access.log")
 set_default(:nginx_error_log, "#{shared_path}/log/nginx_#{application}_error.log")
 
-namespace :nginx do
+set_default(:htpasswd_file, "#{shared_path}/config/htpasswd")
 
-  # desc "Install latest stable release of nginx"
-  # task :install, roles: :web do
-  #   run "#{try_sudo} add-apt-repository ppa:nginx/stable"
-  #   run "#{try_sudo} apt-get -y update"
-  #   run "#{try_sudo} apt-get -y install nginx"
-  # end
-  # after "deploy:install", "nginx:install"
+namespace :nginx do
 
   desc <<-DESC
 Setup nginx configuration for this application.
@@ -35,6 +29,12 @@ Configuration varaibles
 
 - :nginx_error_log- PATH to error log file, by default
   "#{shared_path}/log/nginx_#{application}_error.log"
+
+- :enable_basic_auth - true/false. 
+
+- :htpasswd_file - PATH to basic auth htpasswd file (managed by
+  separate recipe - htpasswd.rb), can be used both by apache and
+  nginx.
 
 Source #{path_to __FILE__}
 
