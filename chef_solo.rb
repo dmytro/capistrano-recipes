@@ -54,8 +54,8 @@ namespace :chefsolo do
 
   set `-S chef_solo_bootstrap_skip=true` to skip execution of this task.
 
-  RVM 
-  ----- 
+  RVM
+  -----
 
   In case chef-solo is not found or can't initiaize environment
   properly when used with sudo, use rvmsudo instead. You also
@@ -81,6 +81,7 @@ EOF
     options = { shell: :bash, pty: true }
     options.merge! hosts: only_hosts if exists? :only_hosts
 
+
     unless exists?(:chef_solo_bootstrap_ran)
       upload_dir chef_solo_path, chef_solo_remote, exclude: %w{./.git ./tmp}, options: options
 
@@ -88,9 +89,16 @@ EOF
         upload_dir custom_chef_solo, chef_solo_remote, exclude: %w{./.git ./tmp}, options: options
       end
 
-      run "#{sudo} bash #{chef_solo_remote}/install.sh #{chef_solo_json}", options
+      l_sudo = sudo               # Hack to use actual sudo locally. In other places - use rvmsudo.
+      set :sudo, "sudo"
+
+      sudo "bash #{chef_solo_remote}/install.sh #{chef_solo_json}", options
+
+      set :sudo, l_sudo
       set :chef_solo_bootstrap_ran, true # Make sure that deploy of chef-solo never runs twice
     end
+
+
   end
 
   desc "Run chef-solo command remotely. Specify JSON file as: -s json=<file>"
