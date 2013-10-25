@@ -24,7 +24,7 @@ server {
   try_files $uri/index.html $uri @<%= application %>;
   location @<%= application %> {
   
-  <% if enable_basic_auth -%>
+  <% if fetch(:enable_basic_auth,false) -%>
     auth_basic "<%= application -%> Restricted";                                
     auth_basic_user_file <%= htpasswd_file -%>;
   <% end -%>
