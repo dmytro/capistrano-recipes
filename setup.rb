@@ -12,6 +12,8 @@ namespace :deploy do
     sudo "chown -R #{user} #{dirs.join(' ')}" if user
   end
 
-  after "deploy:setup", "deploy:chown_dirs"
-  before "database:setup", "deploy:chown_dirs"
 end
+
+after "deploy:setup", "deploy:chown_dirs"
+before "database:setup", "deploy:chown_dirs"
+before "unicorn:setup", "deploy:chown_dirs"
