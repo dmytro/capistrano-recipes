@@ -43,7 +43,7 @@ Source #{ path_to __FILE__}
 
 DESC
   task :htpasswd, roles: :web do
-    unless :enable_basic_auth
+    unless fetch(:enable_basic_auth, false)
       logger.info "Basic auth usage not configured"
     else
       run "cat /dev/null >  #{htpasswd_file}"
