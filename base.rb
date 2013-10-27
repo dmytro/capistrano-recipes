@@ -1,4 +1,4 @@
-require 'chef/knife'
+#require 'chef/knife'
 require 'chef/application/solo'
 require 'chef/data_bag_item'
 require 'pathname'
