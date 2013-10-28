@@ -91,7 +91,7 @@ end
 #
 # Only restart if rsyslog config changed.
 #
-on :start, :only => ["rsyslog:setup", "rsyslog:nginx"] do
+on :start, :only => ["rsyslog:setup", "rsyslog:nginx", "deploy"] do
   on :finish, "rsyslog:restart"
 end
 
