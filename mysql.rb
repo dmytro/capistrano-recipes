@@ -43,6 +43,21 @@ DESC
     :mysql_databag_file is set to `database`. Change it to match your
     environment configuration properly.
 
+Databag format
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+{
+    "id" : "database",
+    "name" : "user",
+    "user" : "user",
+    "password" : "SECRET",
+    "host" : "192.168.1.1"
+}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Note: "host" attribute can be ommited from the databag. In this case
+name of the server with { role: :db, primary: true } is used.
+
+
   * set :database_yml_create, false - prevent from generating file.
 
   * CLI options: use `-S database_yml_create=false` if you don't want
@@ -52,12 +67,13 @@ DESC
   Source file: #{path_to __FILE__} 
   Template:    mysql/database.yml.erb
 
-
-
 DESC
 
   task :database_yml, roles: [:db, :app, :web], :on_no_matching_servers => :continue do
     set :database, get_data_bag(:application, mysql_databag_file)
+
+    database['host'] = find_servers(roles: :db, primary: true).first.host unless database['host']
+
     template "mysql/database.yml.erb", "#{shared_path}/config/database.yml"
     try_sudo "ln -nfs #{shared_path}/config/database.yml #{release_path}/config/"
   end
