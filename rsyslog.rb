@@ -54,6 +54,7 @@ DESC
 
       template "rsyslog/udp_receiver.conf.erb", "/etc/rsyslog.d/udp_receiver.conf", options: { as: 'root', hosts: loggers}
       template "rsyslog/remote_logger.conf.erb", "/etc/rsyslog.d/remote_logger.conf", options: { as: 'root', hosts: clients}
+      sudo "rm -f /etc/rsyslog.d/udp_receiver.conf", hosts: clients
 
     else
       logger.important "**** Remote logger is not defined. Not configuring rsyslog."
