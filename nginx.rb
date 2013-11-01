@@ -41,8 +41,7 @@ Source #{path_to __FILE__}
 DESC
   task :setup, roles: [:app, :web], except: { no_release: true } do
     template "nginx.conf.erb", "/tmp/nginx_conf"
-    run "#{try_sudo} mkdir -p #{shared_path}/config"
-    run "#{try_sudo} cp /tmp/nginx_conf #{shared_path}/config/nginx.conf"
+    try_sudo "mkdir -p #{shared_path}/config"
     sudo "mkdir -p /etc/nginx/sites-enabled/"
     sudo "mv /tmp/nginx_conf /etc/nginx/sites-enabled/#{application}"
     sudo "rm -f /etc/nginx/sites-enabled/default"
