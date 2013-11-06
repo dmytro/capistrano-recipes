@@ -2,9 +2,12 @@ namespace :deploy do
 
   desc <<-DESC
 
-  Change ownership of the created directories at the setup stage to
-  the application deployment user. Run this after deploy:setup task.
+Change ownership of the created directories to user '#{user}'.
 
+Execute at the setup stage to the application deployment user. Run
+this after deploy:setup task.
+
+Source: #{path_to __FILE__}
   DESC
   task :chown_dirs, :except => { :no_release => true } do 
     dirs = [deploy_to, releases_path, shared_path]
