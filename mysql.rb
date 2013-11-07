@@ -107,10 +107,18 @@ DESC
   Configuration
   -------------
 
-  * All setup information is read from databag :application, with item
+  * :mysql_databag_file
+
+    Database information is read from databag :application, with item
     name defained by :mysql_databag_file variable; by default
     :mysql_databag_file is set to `database`. Change it to match your
     environment configuration properly.
+
+  * :use_mysql_secrets_databag
+
+     If this is set to true, then information from :application
+     databag merged with hash from databag named :secrets, item name
+     :mysql.
 
 Databag format
  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -140,6 +148,8 @@ DESC
 
   task :database_yml, roles: [:db, :app, :web], :on_no_matching_servers => :continue do
     set :database, get_data_bag(:application, mysql_databag_file)
+
+    database.merge!(get_data_bag(:secrets, :mysql)) if fetch(:use_mysql_secrets_databag, false)
 
     database['host'] = find_servers(roles: :db, primary: true).first.host unless database['host']
 
