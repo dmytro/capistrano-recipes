@@ -280,3 +280,35 @@ DESC
   before "deploy:migrate", "mysql:database_yml" unless fetch(:database_yml_create, false)
 
 end
+
+__END__
+
+TODO
+
+Current tasks:
+-------------
+
+cap mysql:dump:copy_local       # Copy dump file produced by mysql.dump.curre...
+cap mysql:dump:current          # Dump current environment's database.
+cap mysql:dump:production       # Dump PRODUCTION database to current environ...
+cap mysql:read:production       # Load PRODUCTION dump to current environment...
+
+New tasks:
+-----------
+
+mysql:dump:setup
+
+mysql:dump:production # on the primary production host
+mysql:dump:current # on the DB host
+
+mysql:dump:production:copy:to_local
+mysql:dump:production:copy:to_current
+
+mysql:dump:current:copy:to_local
+
+mysql:dump:production:load_db:to_local
+mysql:dump:production:load_db:to_current
+
+mysql:dump:current:load_db:to_local
+
+mysql:dump:help
