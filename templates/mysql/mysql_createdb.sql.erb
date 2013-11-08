@@ -1,6 +1,6 @@
-<% hosts.each do |location| %>GRANT ALL ON <%= database['name'] %>.* TO '<%= database['user'] %>'@'<%= location %>' IDENTIFIED BY '<%= database['password'] %>';
+<% hosts.each do |location| %>GRANT ALL ON <%= database['database'] %>.* TO '<%= database['user'] %>'@'<%= location %>' IDENTIFIED BY '<%= database['password'] %>';
 <% end -%>
 
-CREATE DATABASE IF NOT EXISTS <%= database['name'] %>;
+CREATE DATABASE IF NOT EXISTS <%= database['database'] %>;
 
 FLUSH PRIVILEGES;
