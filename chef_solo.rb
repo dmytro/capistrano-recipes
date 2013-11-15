@@ -111,6 +111,72 @@ EOF
     run chef_solo_command + (json ? json : "empty.json")
   end
 
+
+
+  desc <<-DESC
+Build databag with server roles.
+
+Build databag to send to servers containing all remote server roles an
+server options. Databag name is :roles_bag, each item name is server
+name from capistrano server definitions.
+
+Databag usage
+-------------
+
+Databags are used by script (run_role.rb) running on the remote host
+by chefsolo:roles task.
+
+Databag format
+--------------
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    {
+      "roles": [
+        "app",
+        "web",
+        "admin",
+        "logger"
+      ],
+      "options": {
+        "app_type": "admins",
+        "hostname": "admin-test"
+      },
+      "id": "10.0.40.252"
+    }
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Source #{path_to __FILE__}
+DESC
+
+  task :roles_bag do
+    require 'json'
+
+    remote = "#{chef_solo_remote}/data_bags/roles_bag"
+    data,hosts,roles,options = { },{ },{ },{ }
+    find_servers.each do |server|
+      data[server.host.gsub(/\./,'_')] = {
+        roles: role_names_for_host(server),
+        options: server.options
+      }
+    end
+
+    begin
+      dir = run_locally(%{ mktemp -d /tmp/tempdatabag.XXXX }).chomp
+      data.keys.each do |serv|
+        File.open("#{dir}/#{serv}.json", "w") do |f|
+          f.print(data[serv].merge({id: serv}).to_json
+                  )
+        end
+      end
+      upload_dir dir, remote
+    ensure
+      run_locally "rm -rf #{dir}"
+    end
+
+  end
+
 end
 
+
 before "deploy", "chefsolo:deploy" unless fetch(:chef_solo_bootstrap_skip, true)
+before "chefsolo:deploy", "chefsolo:roles_bag" unless fetch(:chef_solo_bootstrap_skip, true)

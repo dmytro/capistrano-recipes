@@ -24,18 +24,9 @@ Source File #{path_to __FILE__}
 EOF
 
   task :roles do 
-    json_path = exists?(:custom_chef_solo) ? custom_chef_solo : chef_solo_path
-
-    roles = find_servers_for_task(current_task).map do |current_server|
-      role_names_for_host(current_server)
-    end.flatten.uniq
-    
-    roles.each do |role|
-      file = "#{role.to_s}.json"
-      logger.important "Deploying role #{role}"
-      run "#{chef_solo_command} #{chef_solo_remote}/#{file}", :roles => [role] if File.exists? "#{json_path}/#{file}"
-    end
+    run %Q{ #{try_sudo} #{chef_solo_remote}/run_roles.rb  $CAPISTRANO:HOST$ }
   end                           # :roles
+
   
   desc "Stop after executing chefsolo:roles"
   task :no_release do
