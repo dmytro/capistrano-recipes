@@ -5,6 +5,7 @@ set_default(:domain_name, "#{application}")
 set_default(:nginx_access_log, "#{shared_path}/log/nginx_#{application}_access.log")
 set_default(:nginx_error_log, "#{shared_path}/log/nginx_#{application}_error.log")
 
+set_default(:nginx_redirect_on_http_x_forwarded_proto, false)
 set_default(:htpasswd_file, "#{shared_path}/config/htpasswd")
 
 namespace :nginx do
@@ -36,6 +37,15 @@ Configuration varaibles
   separate recipe - htpasswd.rb), can be used both by apache and
   nginx.
 
+- :nginx_redirect_on_http_x_forwarded_proto (true/false) - Set this to
+  `true` to use X-Forwarded-Proto header to redirect to https HTTP
+  requests. 
+
+  Example usage: ELB on AWS sets this header when SSL is terminated on
+  it. In this case Nginx behind the ELB can redirect to HTTPS.
+
+  Default: false
+
 Source #{path_to __FILE__}
 
 DESC
@@ -48,17 +58,12 @@ DESC
   end
   after "deploy:setup", "nginx:setup"
 
-  %w[start stop].each do |command|
-    desc "#{command} nginx"
-    task command, roles: [:app, :web], except: { no_release: true }  do
+  %w[start stop restart reload].each do |command|
+    desc "#{command.capitalize} Nginx server"
+    task command.to_sym, roles: [:app, :web], except: { no_release: true }  do
       sudo "service nginx #{command}"
     end
     after "deploy:#{command}", "nginx:#{command}"
-  end
-
-  desc "Restart nginx"
-  task :restart, roles: [:app, :web], except: { no_release: true } do
-    sudo "service nginx restart"
   end
 
   desc <<-DESC
