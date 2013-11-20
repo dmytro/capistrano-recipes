@@ -26,6 +26,18 @@ timeout <%= unicorn_timeout %>
 
 preload_app true
 
+# When gems are lodaded from directory in the project tree in Gemfile 
+# (for example : `gem 'api', :path => 'engines/api'`), this part is 
+# required for correct reloading of Unicorn.
+#
+# See:
+# http://blog.willj.net/2011/08/02/fixing-the-gemfile-not-found-bundlergemfilenotfound-error/
+# http://stackoverflow.com/questions/8330577/unicorn-restart-issue-with-capistrano
+#
+before_exec do |server|
+  ENV['BUNDLE_GEMFILE'] = "<%= current_path -%>/Gemfile"
+end
+
 before_fork do |server, worker|
   # the following is highly recomended for Rails + "preload_app true"
   # as there's no need for the master process to hold a connection
