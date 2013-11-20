@@ -63,7 +63,13 @@ DESC
     task command.to_sym, roles: [:app, :web], except: { no_release: true }  do
       sudo "service nginx #{command}"
     end
-    after "deploy:#{command}", "nginx:#{command}"
+    # TODO: Don't restart Nginx on deploy:restart. Find way to change
+    # TODO: it to reload, instead.
+    # TODO: after "deploy:#{command}", "nginx:#{command}"
+    #
+    after "deploy:start",  "nginx:start"
+    after "deploy:reload",  "nginx:reload"
+    after "deploy:restart", "nginx:reload"
   end
 
   desc <<-DESC
