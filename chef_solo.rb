@@ -131,7 +131,8 @@ Databag format
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     {
-      "roles": [
+      "id": "10_0_40_252",
+      "role": [
         "app",
         "web",
         "admin",
@@ -141,7 +142,8 @@ Databag format
         "app_type": "admins",
         "hostname": "admin-test"
       },
-      "id": "10.0.40.252"
+      "ipaddress": "10.0.40.252",
+      "fqdn": "10.0.40.252"
     }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -151,12 +153,15 @@ DESC
   task :roles_bag do
     require 'json'
 
-    remote = "#{chef_solo_remote}/data_bags/roles_bag"
+    remote = "#{chef_solo_remote}/data_bags/node"
     data,hosts,roles,options = { },{ },{ },{ }
+
     find_servers.each do |server|
       data[server.host.gsub(/\./,'_')] = {
-        roles: role_names_for_host(server),
-        options: server.options
+        role:      role_names_for_host(server),
+        fqdn:      server.options[:hostname] || server.host, 
+        ipaddress: server.host,
+        options:   server.options
       }
     end
 
