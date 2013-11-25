@@ -132,7 +132,8 @@ Output
   suffix 'bz2' if compression is enabled.
 
 * Task sets variable :database_dump_outfile - full path to the file on
-  remote host (used to copy file to local host).
+  remote host (used to copy file to local host or load file on the
+  remote server).
 
 Source: #{path_to __FILE__}
 DESC
@@ -194,8 +195,24 @@ DESC
       end
     end                         # production
     
-    desc "TODO: load DB dump file to current environment"
-    task :load_db do 
+    desc <<-DESC
+Load DB dump file to current environment.
+
+Local MySQL dump file copied to remote sercer and loaded to the DB.
+
+Command line option: -s mysql_dump=<PATH to dump file>
+
+Source #{path_to __FILE__}
+DESC
+    task :load_db, roles: :db, only: {  primary: true } do
+      abort "***** Will NOT load database to production '#{server_environment}' environment" if server_environment =~ /prod/
+      file = fetch(:mysql_dump, false)
+      if file
+        upload file, "#{database_dump_location}/#{file}"
+        do_load "#{database_dump_location}/#{file}", current_db_config
+      else
+        abort "Please specify PATH to MySQL local dump file: -s mysql_dump=<filename>"
+      end
     end
 
   end                           # dump
