@@ -1,60 +1,6 @@
 set_default :mysql_databag_file, "database"
-set_default :database_dump_location, "#{shared_path}/db/dumps"
-set_default :database_dump_compress, false
 
-##
-# Perform dump of the database on the remote host. Credentials and
-# DB name are passed by Hash database, with similar structrue as
-# used in database.yml file.
-#
-# @param [Hash] database DB credentials
-# @param [String] Rails environment used to generate file name of the dump.
-#
-# @return [String] filename of the dump.
-#
-def do_dump database, env=fetch(:rails_env)
-  file = "#{fetch(:database_dump_location)}/#{application}_#{env}.#{Time.now.strftime "%Y%m%d%H%M"}.dump#{fetch(:database_dump_compress,false) ? '.bz2' : ''}"
-  cmd = "mysqldump --user=#{database['username']} --host=#{database['host']} -p #{database['database']} #{fetch(:database_dump_compress,false) ? '| bzip2' : '' } > #{file}"
-  run cmd do |ch, stream, out|
-    ch.send_data "#{database['password']}\n" if out =~ /^Enter password:/
-    puts out
-  end
-  file
-end
-
-##
-# Read database dump file and load it to the DB.
-#
-# @param [String] file Full path to the dump file on remote host.
-# @param [Hash] database Configuration hash for the DB to connect to.
-#
-def do_load file, database
-  cat = file =~ /\.bz2/ ? "bunzip2 -c " : "cat "
-
-  cmd = "#{cat} #{file} | mysql --host=#{ database['host']}  --user=#{database['username']} -p #{database['database']}"
-
-  run cmd do |ch, stream, out|
-    ch.send_data "#{database['password']}\n" if out =~ /^Enter password:/
-    puts out
-  end
-end
-
-##
-# Read curent DB config from remote database.yml file
-#
-# @return [Hash] database.yml part corresponding to the environment.
-#
-def current_db_config env=fetch(:rails_env)
-  begin
-    tmp_db_yml = %x{ mktemp /tmp/database_yml_XXX }.chomp.strip
-    get("#{shared_path}/config/database.yml", tmp_db_yml)
-    database = YAML::load_file(tmp_db_yml)[env]
-  ensure
-    File.delete tmp_db_yml
-  end
-  database
-end
-
+load File.join(File.dirname(__FILE__), "mysql_dump.rb")
 namespace :mysql do
 
   desc <<-DESC
@@ -85,18 +31,6 @@ DESC
       run "cat /tmp/mysql_createdb.sql"
       run "rm -f /tmp/mysql_createdb.sql"
     end
-  end
-# ========================================================================================
-  desc <<-DESC
-[internal] Setup dump directory for MySQL database.
-
-Source #{path_to __FILE__}
-
-DESC
-
-  task :setup_dump, roles: [:db], only: { primary: true } do
-    sudo "mkdir -p #{fetch(:database_dump_location)}"
-    sudo "chown #{user} #{fetch(:database_dump_location)}"
   end
 
 # ========================================================================================
@@ -159,156 +93,11 @@ DESC
 
 
 
-  namespace :dump do
-    # ========================================================================================
-
-    desc <<-DESC
-Dump current environment's database.
-
-Currently configured server found with { roles: :db, primary: true }
-is dumped to :database_dump_location.
-
-Configuration
--------------
-
-* :database_dump_location - directory for storing dumps
-
-* :database_dump_compress - true/false. If true then calls bzip2 to compress output dump file.
-
-* Credentials are read from database.yml file on the target server.
-
-Output
------------
-
-* Output file stored in the timestamped file. File name consists of
-  :application, :rails_env, timestamp YYYYMMDDHHMM, and suffix 'bz2'
-  if compression is enabled.
-
-* Task sets variable :database_dump_outfile - full path to the file on
-  remote host.
-
-Source #{path_to __FILE__}
-
-DESC
-    task :current, roles: [:db], only: { primary: true } do
-      database = current_db_config
-      set :database_dump_outfile, do_dump(database)
-    end
-
-    # ========================================================================================
-
-    desc  <<-DESC
-Copy dump file produced by mysql.dump.current to local host.
-
-File is stored with the same name as remote dump file in the current
-directory.
-
-Source #{path_to __FILE__}
-
-DESC
-
-    task :copy_local, roles: [:db], only: { primary: true }  do
-      top.mysql.dump.current
-      remote = fetch(:database_dump_outfile, false)
-      if remote
-        get remote, File.basename(remote)
-        logger.important " Copied remote MySQL dump to local file #{File.basename(remote)}"
-      end
-    end
-
-    # ========================================================================================
-    desc <<-DESC
-Dump PRODUCTION database to current environment's database server directory.
-
-Current DB server found with { roles: :db, primary: true } is dumped
-to :database_dump_location. Production DB configuratiopn need to be
-provided separately in a databag.
-
-Configuration
--------------
-
-* See attributes of mysql:dump:current.
-
-* Credentials for production database are read from databag
-  :application with item name :production_database.
-
-Output
------------
-
-* Same as `mysql:dump:current` task's.
-
-Source #{path_to __FILE__}
-
-DESC
-    task :production, roles: [:db], only: { primary: true } do
-      database = get_data_bag(:application, 'production_database')
-
-      set :database_dump_outfile, do_dump(database, 'production')
-    end
-
-
-  end # namespace :dump
-
-  # ========================================================================================
-
-  namespace :read do
-    desc <<-DESC
-Load PRODUCTION dump to current environment DB.
-
-Source #{path_to __FILE__}
-DESC
-    task :production, roles: [:db], only: { primary: true }  do
-      production = get_data_bag(:application, 'production_database')
-      current  = current_db_config
-
-      if current['host'] == production['host'] && current['database'] == production['database']
-        raise  "Check what you are doing. Can't dump and load to the same DB."
-      end
-
-      file = do_dump production, 'production'
-      do_load file, current
-
-    end
-
-  end # namespace :load
-
 
   ########################################################################################
 
-  after "depoy:setup", "mysql:setup_dump"
   before "deploy:migrate", "mysql:setup"
   before "deploy:migrate", "mysql:database_yml" unless fetch(:database_yml_create, false)
 
 end
 
-__END__
-
-TODO
-
-Current tasks:
--------------
-
-cap mysql:dump:copy_local       # Copy dump file produced by mysql.dump.curre...
-cap mysql:dump:current          # Dump current environment's database.
-cap mysql:dump:production       # Dump PRODUCTION database to current environ...
-cap mysql:read:production       # Load PRODUCTION dump to current environment...
-
-New tasks:
------------
-
-mysql:dump:setup
-
-mysql:dump:production # on the primary production host
-mysql:dump:current # on the DB host
-
-mysql:dump:production:copy:to_local
-mysql:dump:production:copy:to_current
-
-mysql:dump:current:copy:to_local
-
-mysql:dump:production:load_db:to_local
-mysql:dump:production:load_db:to_current
-
-mysql:dump:current:load_db:to_local
-
-mysql:dump:help
