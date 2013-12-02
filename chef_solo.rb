@@ -8,6 +8,8 @@ set_default :chef_solo_remote,     "~#{user}/chef"
 set_default :chef_solo_command,    %Q{cd #{chef_solo_remote} && #{try_sudo} chef-solo --config #{chef_solo_remote}/solo.rb --json-attributes }
 set_default :chef_solo_bootstrap_skip, false
 
+load File.join(File.dirname(__FILE__), "chef_solo_databags.rb")
+
 namespace :chefsolo do
 
   desc <<-EOF
@@ -110,78 +112,8 @@ EOF
 
     run chef_solo_command + (json ? json : "empty.json")
   end
-
-
-
-  desc <<-DESC
-Build databag with server roles.
-
-Build databag to send to servers containing all remote server roles an
-server options. Databag name is :roles_bag, each item name is server
-name from capistrano server definitions.
-
-Databag usage
--------------
-
-Databags are used by script (run_role.rb) running on the remote host
-by chefsolo:roles task.
-
-Databag format
---------------
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    {
-      "id": "10_0_40_252",
-      "role": [
-        "app",
-        "web",
-        "admin",
-        "logger"
-      ],
-      "options": {
-        "app_type": "admins",
-        "hostname": "admin-test"
-      },
-      "ipaddress": "10.0.40.252",
-      "fqdn": "10.0.40.252"
-    }
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Source #{path_to __FILE__}
-DESC
-
-  task :roles_bag do
-    require 'json'
-
-    remote = "#{chef_solo_remote}/data_bags/node"
-    data,hosts,roles,options = { },{ },{ },{ }
-
-    find_servers.each do |server|
-      data[server.host.gsub(/\./,'_')] = {
-        role:      role_names_for_host(server),
-        fqdn:      server.options[:hostname] || server.host, 
-        ipaddress: server.host,
-        options:   server.options
-      }
-    end
-
-    begin
-      dir = run_locally(%{ mktemp -d /tmp/tempdatabag.XXXX }).chomp
-      data.keys.each do |serv|
-        File.open("#{dir}/#{serv}.json", "w") do |f|
-          f.print(data[serv].merge({id: serv}).to_json
-                  )
-        end
-      end
-      upload_dir dir, remote
-    ensure
-      run_locally "rm -rf #{dir}"
-    end
-
-  end
-
 end
 
 
 before "deploy", "chefsolo:deploy" unless fetch(:chef_solo_bootstrap_skip, true)
-before "chefsolo:deploy", "chefsolo:roles_bag" unless fetch(:chef_solo_bootstrap_skip, true)
+before "chefsolo:deploy", "chefsolo:databags:roles" unless fetch(:chef_solo_bootstrap_skip, true)
