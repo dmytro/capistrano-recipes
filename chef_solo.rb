@@ -85,6 +85,8 @@ EOF
 
 
     unless exists?(:chef_solo_bootstrap_ran)
+      %w{ cookbooks site-cookbooks}.map { |dir| sudo "rm -rf #{chef_solo_remote}/#{dir}" }
+      
       upload_dir chef_solo_path, chef_solo_remote, exclude: %w{./.git ./tmp}, options: options
 
       if exists?(:custom_chef_solo) && Dir.exists?(custom_chef_solo)
@@ -115,5 +117,6 @@ EOF
 end
 
 
-before "deploy", "chefsolo:deploy" unless fetch(:chef_solo_bootstrap_skip, true)
-before "chefsolo:deploy", "chefsolo:databags:roles" unless fetch(:chef_solo_bootstrap_skip, true)
+before "deploy",          "chefsolo:deploy"        unless fetch(:chef_solo_bootstrap_skip, true)
+before "chefsolo:deploy", "chefsolo:databag:cap"   unless fetch(:chef_solo_bootstrap_skip, true)
+before "chefsolo:deploy", "chefsolo:databag:roles" unless fetch(:chef_solo_bootstrap_skip, true)
