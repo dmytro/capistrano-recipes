@@ -65,20 +65,20 @@ DESC
       data,hosts,roles,options = { },{ },{ },{ }
       
       find_servers.each do |server|
-        data[server.host.gsub(/\./,'_')] = {
+        data[server.host] = {
+          id:        server.host.gsub(/\./,'_'),
           role:      role_names_for_host(server),
           fqdn:      server.options[:hostname] || server.host, 
           ipaddress: server.host,
           options:   server.options
         }
       end
-      
+
       begin
         dir = run_locally(%{ mktemp -d /tmp/tempdatabag.XXXX }).chomp
         data.keys.each do |serv|
           File.open("#{dir}/#{serv}.json", "w") do |f|
-            f.print(data[serv].merge({id: serv}).to_json
-                    )
+            f.print data[serv].to_json
           end
         end
         upload_dir dir, remote

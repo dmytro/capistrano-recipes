@@ -85,7 +85,9 @@ EOF
 
 
     unless exists?(:chef_solo_bootstrap_ran)
-      %w{ cookbooks site-cookbooks}.map { |dir| sudo "rm -rf #{chef_solo_remote}/#{dir}" }
+      %w{cookbooks site-cookbooks data_bags }.map { |dir| # make sure directories are cleaned between runs
+        sudo "rm -rf #{chef_solo_remote}/#{dir}" 
+      }
       
       upload_dir chef_solo_path, chef_solo_remote, exclude: %w{./.git ./tmp}, options: options
 
@@ -95,6 +97,9 @@ EOF
 
       l_sudo = sudo               # Hack to use actual sudo locally. In other places - use rvmsudo.
       set :sudo, "sudo"
+
+      top.chefsolo.databag.cap
+      top.chefsolo.databag.roles
 
       sudo "bash #{chef_solo_remote}/install.sh #{chef_solo_json}", options
 
@@ -115,8 +120,5 @@ EOF
     run chef_solo_command + (json ? json : "empty.json")
   end
 end
+before "deploy", "chefsolo:deploy" unless fetch(:chef_solo_bootstrap_skip, true)
 
-
-before "deploy",          "chefsolo:deploy"        unless fetch(:chef_solo_bootstrap_skip, true)
-before "chefsolo:deploy", "chefsolo:databag:cap"   unless fetch(:chef_solo_bootstrap_skip, true)
-before "chefsolo:deploy", "chefsolo:databag:roles" unless fetch(:chef_solo_bootstrap_skip, true)
