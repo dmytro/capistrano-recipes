@@ -13,7 +13,7 @@ load File.join(File.dirname(__FILE__), "chef_solo_databags.rb")
 namespace :chefsolo do
 
   desc <<-EOF
-   Run chef-solo deploy on the remote server.
+   [internal] Install chef-solo and configuration on remote server(s).
 
    Task needs chef-solo repository git@github.com:dmytro/chef-solo.git
    installed as git submodule or directory.
@@ -83,42 +83,44 @@ EOF
     options = { shell: :bash, pty: true }
     options.merge! hosts: only_hosts if exists? :only_hosts
 
-
-    unless exists?(:chef_solo_bootstrap_ran)
-      %w{cookbooks site-cookbooks data_bags }.map { |dir| # make sure directories are cleaned between runs
-        sudo "rm -rf #{chef_solo_remote}/#{dir}" 
-      }
+    unless fetch(:chef_solo_bootstrap_ran, false)
       
-      upload_dir chef_solo_path, chef_solo_remote, exclude: %w{./.git ./tmp}, options: options
+      begin
+        dir = run_locally(%{ mktemp -d /tmp/tempchef.XXXX }).chomp
+        set :local_chef_cache_dir, dir
+        
+        copy_dir chef_solo_path, dir, exclude: %w{./.git ./tmp}
+        
+        if exists?(:custom_chef_solo) && Dir.exists?(custom_chef_solo)
+          copy_dir custom_chef_solo, dir, exclude: %w{./.git ./tmp}
+        end
+        
+        top.chefsolo.databag.cap
+        top.chefsolo.databag.roles
 
-      if exists?(:custom_chef_solo) && Dir.exists?(custom_chef_solo)
-        upload_dir custom_chef_solo, chef_solo_remote, exclude: %w{./.git ./tmp}, options: options
+        # make sure directories are cleaned between runs
+        run "cd #{chef_solo_remote} && #{sudo} rm -rf cookbooks site-cookbooks data_bags"
+        upload_dir dir, chef_solo_remote, options: options
+      ensure
+        run_locally "rm -rf local_chef_cache_dir"
       end
 
-      l_sudo = sudo               # Hack to use actual sudo locally. In other places - use rvmsudo.
-      set :sudo, "sudo"
-
-      top.chefsolo.databag.cap
-      top.chefsolo.databag.roles
-
-      sudo "bash #{chef_solo_remote}/install.sh #{chef_solo_json}", options
-
-      set :sudo, l_sudo
+      top.chefsolo.roles
       set :chef_solo_bootstrap_ran, true # Make sure that deploy of chef-solo never runs twice
     end
 
 
   end
 
-  desc "Run chef-solo command remotely. Specify JSON file as: -s json=<file>"
-  task :run_remote do
+  # desc "[internal] Run chef-solo command remotely. Specify JSON file as: -s json=<file>"
+  # task :run_remote do
 
-    # Limit execution to only hosts in the list if list provided
-    options = { shell: :bash, pty: true }
-    options.merge! hosts: only_hosts if exists? :only_hosts
+  #   # Limit execution to only hosts in the list if list provided
+  #   options = { shell: :bash, pty: true }
+  #   options.merge! hosts: only_hosts if exists? :only_hosts
 
-    run chef_solo_command + (json ? json : "empty.json")
-  end
+  #   run chef_solo_command + (json ? json : "empty.json")
+  # end
 end
 before "deploy", "chefsolo:deploy" unless fetch(:chef_solo_bootstrap_skip, true)
 

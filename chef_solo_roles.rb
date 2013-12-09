@@ -24,11 +24,15 @@ Source File #{path_to __FILE__}
 EOF
 
   task :roles do 
+    l_sudo = sudo               # Hack to use actual sudo locally. In other places - use rvmsudo.
+    set :sudo, "sudo"
+    sudo "bash #{chef_solo_remote}/install.sh empty.json", options
+    set :sudo, l_sudo
     run %Q{ #{try_sudo} #{chef_solo_remote}/run_roles.rb  $CAPISTRANO:HOST$ }
   end                           # :roles
 
   
-  desc "Stop after executing chefsolo:roles"
+  desc "[internal] Stop after executing chefsolo:roles"
   task :no_release do
     logger.info "Infra deployed. Stopping on user request."
     exit
@@ -36,6 +40,6 @@ EOF
 end
 
 
-after  "chefsolo:roles", "chefsolo:no_release" if fetch(:infra_only, false)
-before "chefsolo:roles", "chefsolo:deploy" unless fetch(:chef_solo_roles_skip, true)
-before "deploy", "chefsolo:roles"          unless fetch(:chef_solo_roles_skip, true)
+#after  "chefsolo:roles", "chefsolo:no_release" if fetch(:infra_only, false)
+#before "chefsolo:roles", "chefsolo:deploy" unless fetch(:chef_solo_roles_skip, true)
+#before "deploy", "chefsolo:roles"          unless fetch(:chef_solo_roles_skip, true)

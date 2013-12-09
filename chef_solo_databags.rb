@@ -5,7 +5,7 @@ namespace :chefsolo do
   namespace :databag do
 
     desc <<-DESC
-Build Chef databag from Capistrano configuration.
+[internal] Build Chef databag from Capistrano configuration.
 
 Expose Capistrano configuration to Chhef as databag. Create and save
 data_bag to all remote servers with current Capistrano
@@ -23,7 +23,7 @@ DESC
     end
     
     desc <<-DESC
-Build databag with server roles.
+[internal] Build databag with server roles.
 
 Build databag to send to servers containing all remote server roles an
 server options. Databag name is :node, each item name is server
@@ -60,9 +60,7 @@ Source #{path_to __FILE__}
 DESC
 
     task :roles do
-      
-      remote = "#{chef_solo_remote}/data_bags/node"
-      data,hosts,roles,options = { },{ },{ },{ }
+      data = { }
       
       find_servers.each do |server|
         data[server.host] = {
@@ -81,7 +79,7 @@ DESC
             f.print data[serv].to_json
           end
         end
-        upload_dir dir, remote
+        copy_dir dir, "#{local_chef_cache_dir}/data_bags/node"
       ensure
         run_locally "rm -rf #{dir}"
       end
@@ -99,11 +97,15 @@ namespaced scope.
 Source #{path_to __FILE__}
 DESC
 task :configuration_bag do
-  dir = capture( "echo #{chef_solo_remote}/data_bags/capistrano").chomp
-
-  run "test -d #{dir} || mkdir -p #{dir}"
   vars = {}
   @variables.each { |k,v| vars[k] = v unless v.class == Proc }
-  put vars.merge({ "id" => "config"}).to_json, "#{dir}/config.json"
+
+  dir = "#{local_chef_cache_dir}/data_bags/capistrano"
+  FileUtils.mkdir_p dir
+  File.open("#{dir}/config.json", "w") do |file|
+    file << vars.merge({ "id" => "config"}).to_json
+    file.close
+  end
+
 end
 

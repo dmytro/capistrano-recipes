@@ -137,7 +137,7 @@ end
 #
 # @param remote [String]
 #
-# @apram exclude: [Array] list of local subdirectories, regexp's to
+# @param exclude: [Array] list of local subdirectories, regexp's to
 #     exclude from tar'ing. Arguments to tar's --exclude command. By
 #     default always exclude .git subdirectory.
 #
@@ -151,4 +151,18 @@ def upload_dir local, remote, options: {}, exclude: ["./.git"]
     run_locally "rm -f #{temp}"
     run  "rm -f #{temp}", options
   end
+end
+
+##
+# Copy directory locally using tar.
+#
+# @param  src [String]
+#
+# @param  dst [String]
+#
+# @param exclude: [Array] list of local subdirectories, regexp's to
+#     exclude from tar'ing. Arguments to tar's --exclude command. By
+#     default always exclude .git subdirectory.
+def copy_dir src, dest, exclude: ["./.git"]
+  run_locally "mkdir -p #{dest} && (cd #{src} && tar cf - #{exclude.map { |e| "--exclude #{e}" }.join(' ')} .) | (cd #{dest} && tar xf -)"
 end
