@@ -3,7 +3,7 @@ set_default :chef_solo_roles_skip, false
 namespace :chefsolo do
 
   desc <<-EOF
-Deploy JSON file(s) to server corresponding to servers' role(s)
+[internal] Deploy JSON file(s) to server corresponding to servers' role(s)
 
 This recipe will find all roles the target server has and try to
 deploy to the server JSON file(s) corresponding to server role(s). If
@@ -15,9 +15,7 @@ role :web, web01.example.com
 this recipe will deploy role `db.json` to db01 and `web.json` to
 web01.
 
-Configuration:
-
-- To skip infra roles process use: cap -s chef_solo_roles_skip=true ...
+Chef solo roles is called internally from chefsolo:deploy.
 
 Source File #{path_to __FILE__}
 

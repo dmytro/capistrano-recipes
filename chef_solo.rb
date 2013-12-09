@@ -13,7 +13,7 @@ load File.join(File.dirname(__FILE__), "chef_solo_databags.rb")
 namespace :chefsolo do
 
   desc <<-EOF
-   [internal] Install chef-solo and configuration on remote server(s).
+   Install chef-solo and configuration on remote server(s).
 
    Task needs chef-solo repository git@github.com:dmytro/chef-solo.git
    installed as git submodule or directory.
