@@ -111,16 +111,7 @@ EOF
 
 
   end
-
-  # desc "[internal] Run chef-solo command remotely. Specify JSON file as: -s json=<file>"
-  # task :run_remote do
-
-  #   # Limit execution to only hosts in the list if list provided
-  #   options = { shell: :bash, pty: true }
-  #   options.merge! hosts: only_hosts if exists? :only_hosts
-
-  #   run chef_solo_command + (json ? json : "empty.json")
-  # end
 end
+
 before "deploy", "chefsolo:deploy" unless fetch(:chef_solo_bootstrap_skip, true)
 

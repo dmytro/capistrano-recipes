@@ -36,8 +36,3 @@ EOF
     exit
   end
 end
-
-
-#after  "chefsolo:roles", "chefsolo:no_release" if fetch(:infra_only, false)
-#before "chefsolo:roles", "chefsolo:deploy" unless fetch(:chef_solo_roles_skip, true)
-#before "deploy", "chefsolo:roles"          unless fetch(:chef_solo_roles_skip, true)
