@@ -102,7 +102,7 @@ EOF
         run "cd #{chef_solo_remote} && #{sudo} rm -rf cookbooks site-cookbooks data_bags"
         upload_dir dir, chef_solo_remote, options: options
       ensure
-        run_locally "rm -rf local_chef_cache_dir"
+        run_locally "rm -rf #{local_chef_cache_dir}"
       end
 
       top.chefsolo.roles
