@@ -62,21 +62,19 @@ DESC
     task :roles do
       data = { }
       
-      find_servers.each do |server|
-        data[server.host] = {
-          id:        server.host.gsub(/\./,'_'),
-          role:      role_names_for_host(server),
-          fqdn:      server.options[:hostname] || server.host, 
-          ipaddress: server.host,
-          options:   server.options
-        }
-      end
 
       begin
         dir = run_locally(%{ mktemp -d /tmp/tempdatabag.XXXX }).chomp
-        data.keys.each do |serv|
-          File.open("#{dir}/#{serv}.json", "w") do |f|
-            f.print data[serv].to_json
+        find_servers.each do |server|
+          File.open("#{dir}/#{server}.json", "w") do |f|
+            f.print({
+                      id:        server.host.gsub(/\./,'_'),
+                      role:      role_names_for_host(server),
+                      fqdn:      server.options[:hostname] || server.host, 
+                      ipaddress: server.host,
+                      options:   server.options
+                    }.to_json)
+            f.close
           end
         end
         copy_dir dir, "#{local_chef_cache_dir}/data_bags/node"
