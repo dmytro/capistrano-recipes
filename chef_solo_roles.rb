@@ -27,12 +27,9 @@ EOF
     sudo "bash #{chef_solo_remote}/install.sh empty.json", options
     set :sudo, l_sudo
     run %Q{ #{try_sudo} #{chef_solo_remote}/run_roles.rb  $CAPISTRANO:HOST$ }
+    if fetch(:only_infra, false)
+      logger.info "********************** ONLY INFRA specified, Infra deployed. Stopping on user request. **********************"
+      exit
+    end
   end                           # :roles
-
-  
-  desc "[internal] Stop after executing chefsolo:roles"
-  task :no_release do
-    logger.info "Infra deployed. Stopping on user request."
-    exit
-  end
 end
