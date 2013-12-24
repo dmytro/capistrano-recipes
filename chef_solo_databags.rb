@@ -67,13 +67,13 @@ DESC
         dir = run_locally(%{ mktemp -d /tmp/tempdatabag.XXXX }).chomp
         find_servers.each do |server|
           File.open("#{dir}/#{server}.json", "w") do |f|
-            f.print({
+            f.print(({
                       id:        server.host.gsub(/\./,'_'),
+                      name:      server.host,
                       role:      role_names_for_host(server),
                       fqdn:      server.options[:hostname] || server.host, 
                       ipaddress: server.host,
-                      options:   server.options
-                    }.to_json)
+                    }).merge(server.options).to_json)
             f.close
           end
         end
