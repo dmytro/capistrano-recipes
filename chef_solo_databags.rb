@@ -4,6 +4,12 @@ require 'json'
 namespace :chefsolo do
   namespace :databag do
 
+    # @param [String] name name of the databag (directory)
+    # @param [Hash] data
+    # def write_databag name, data
+    # end
+
+
     desc <<-DESC
 [internal] Build Chef databag from Capistrano configuration.
 
@@ -64,22 +70,66 @@ DESC
       
 
       begin
-        dir = run_locally(%{ mktemp -d /tmp/tempdatabag.XXXX }).chomp
+        node_dir = run_locally(%{ mktemp -d /tmp/tempdatabag.XXXX }).chomp
+        role_dir = run_locally(%{ mktemp -d /tmp/tempdatabag.XXXX }).chomp
+        env_dir  = run_locally(%{ mktemp -d /tmp/tempdatabag.XXXX }).chomp
+
+        roles = { }
         find_servers.each do |server|
-          File.open("#{dir}/#{server}.json", "w") do |f|
+
+          role_names_for_host(server).each do |role|
+            roles[role] ||= []
+            roles[role] << server
+          end
+          
+          # :node databag
+          # ----------------------
+          File.open("#{node_dir}/#{server}.json", "w") do |f|
             f.print(({
-                      id:        server.host.gsub(/\./,'_'),
-                      name:      server.host,
-                      role:      role_names_for_host(server),
-                      fqdn:      server.options[:hostname] || server.host, 
-                      ipaddress: server.host,
-                    }).merge(server.options).to_json)
+                       id:                   server.host.gsub(/\./,'_'),
+                       name:                 server.host,
+                       role:                 role_names_for_host(server), # 2 entires for roles `role` used by Munin, `roles` by Nagios
+                       roles:                role_names_for_host(server), 
+                       fqdn:                 server.options[:hostname] || server.host, 
+                       ipaddress:            server.host,
+                       os:                   server.options[:os] || 'linux', # TODO get real os of :node
+                       chef_environment:     fetch(:stage)
+                     }).merge(server.options).to_json)
             f.close
           end
         end
-        copy_dir dir, "#{local_chef_cache_dir}/data_bags/node"
+
+        # :role databag
+        # ----------------------
+        roles.keys.each do |role|
+          File.open("#{role_dir}/#{role}.json", "w") do |f|
+            f.print({
+                      id:            role,
+                      name:          role,
+                      hosts:         roles[role].map(&:host)
+                      #hostnames:     roles[role].map(&:options)
+                    }.to_json)
+            f.close
+          end
+
+          # :environment databag
+          # ----------------------
+          stage = fetch(:stage)
+          File.open("#{env_dir}/#{stage}.json", "w") do |f|
+            f.print({
+                      id:    stage,
+                      name:  stage
+                    }.to_json)
+            f.close
+          end
+
+        end
+        copy_dir node_dir, "#{local_chef_cache_dir}/data_bags/node"
+        copy_dir role_dir, "#{local_chef_cache_dir}/data_bags/role"
+        copy_dir role_dir, "#{local_chef_cache_dir}/data_bags/roles"
+        copy_dir env_dir,  "#{local_chef_cache_dir}/data_bags/environment"
       ensure
-        run_locally "rm -rf #{dir}"
+       run_locally "rm -rf #{node_dir} #{role_dir} #{env_dir}"
       end
     end
   end                           # namespace databag
