@@ -99,7 +99,7 @@ EOF
         top.chefsolo.databag.roles
 
         # make sure directories are cleaned between runs
-        run "cd #{chef_solo_remote} && #{sudo} rm -rf cookbooks site-cookbooks data_bags"
+        run "(cd #{chef_solo_remote} && #{sudo} rm -rf cookbooks site-cookbooks data_bags); true "
         upload_dir dir, chef_solo_remote, options: options
       ensure
         run_locally "rm -rf #{local_chef_cache_dir}"
