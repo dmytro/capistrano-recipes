@@ -56,6 +56,8 @@ DESC
       template "rsyslog/remote_logger.conf.erb", "/etc/rsyslog.d/remote_logger.conf", options: { as: 'root', hosts: clients}
       sudo "rm -f /etc/rsyslog.d/udp_receiver.conf", hosts: clients
 
+      set :changed_rsyslog, true
+
     else
       logger.important "**** Remote logger is not defined. Not configuring rsyslog."
     end
@@ -76,6 +78,7 @@ Source #{path_to __FILE__}
 DESC
   task :nginx do
     template "rsyslog/nginx.conf.erb", "/etc/rsyslog.d/10-nginx.conf", options: { as: 'root'}
+    set :changed_rsyslog, true
   end
 
   desc <<-DESC
@@ -85,15 +88,18 @@ Source #{path_to __FILE__}
 
 DESC
   task :restart do 
-    sudo "/etc/init.d/rsyslog restart"
+    sudo "/etc/init.d/rsyslog restart" if fetch(:changed_rsyslog, false)
   end
 end
 
 #
 # Only restart if rsyslog config changed.
 #
-on :start, :only => ["rsyslog:setup", "rsyslog:nginx", "deploy"] do
-  on :finish, "rsyslog:restart"
-end
+# on :start, :only => ["rsyslog:setup", "rsyslog:nginx", "deploy"] do
+#   on :finish, "rsyslog:restart"
+# end
 
-after "deploy:setup", "rsyslog:setup"
+before "chefsolo:exit_on_request", "rsyslog:restart"
+on :finish, "rsyslog:restart"
+
+after "chefsolo:roles", "rsyslog:setup"
