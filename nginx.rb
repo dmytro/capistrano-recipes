@@ -31,7 +31,7 @@ Configuration varaibles
 - :nginx_error_log- PATH to error log file, by default
   "#{shared_path}/log/nginx_#{application}_error.log"
 
-- :enable_basic_auth - true/false. 
+- :enable_basic_auth - true/false.
 
 - :htpasswd_file - PATH to basic auth htpasswd file (managed by
   separate recipe - htpasswd.rb), can be used both by apache and
@@ -39,7 +39,7 @@ Configuration varaibles
 
 - :nginx_redirect_on_http_x_forwarded_proto (true/false) - Set this to
   `true` to use X-Forwarded-Proto header to redirect to https HTTP
-  requests. 
+  requests.
 
   Example usage: ELB on AWS sets this header when SSL is terminated on
   it. In this case Nginx behind the ELB can redirect to HTTPS.
