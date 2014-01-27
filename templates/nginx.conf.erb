@@ -13,6 +13,11 @@ server {
         return 444;
     }
 
+<%# If backend Rails process doesn't set header, then we just need to pass it. Otherwise will need to hide it. -%>
+  <% if fetch(:nginx_pass_server_header,false) -%>
+    server_tokens off;
+    proxy_pass_header Server;
+  <% end -%>
 
 <% if nginx_redirect_on_http_x_forwarded_proto -%>
   location /healthcheck.txt {
@@ -49,9 +54,9 @@ server {
     }
   <% end -%>
 
-  
+
   <% if fetch(:enable_basic_auth,false) -%>
-    auth_basic "<%= application -%> Restricted";                                
+    auth_basic "<%= application -%> Restricted";
     auth_basic_user_file <%= htpasswd_file -%>;
   <% end -%>
 
