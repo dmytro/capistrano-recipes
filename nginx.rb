@@ -41,13 +41,16 @@ Configuration varaibles
   `true` to use X-Forwarded-Proto header to redirect to https HTTP
   requests.
 
-- :nginx_pass_server_header - set to true to enable hiding 'Server:'
-  header of Nginx.
-
   Example usage: ELB on AWS sets this header when SSL is terminated on
   it. In this case Nginx behind the ELB can redirect to HTTPS.
 
   Default: false
+
+- :nginx_pass_server_header - set to true to enable hiding 'Server:'
+  header of Nginx.
+
+  Default: false
+
 
 Source #{path_to __FILE__}
 
