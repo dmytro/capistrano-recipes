@@ -89,11 +89,11 @@ DESC
                        id:                   server.host.gsub(/\./,'_'),
                        name:                 server.host,
                        role:                 role_names_for_host(server), # 2 entires for roles `role` used by Munin, `roles` by Nagios
-                       roles:                role_names_for_host(server), 
-                       fqdn:                 server.options[:hostname] || server.host, 
+                       roles:                role_names_for_host(server),
+                       fqdn:                 server.options[:hostname] || server.host,
                        ipaddress:            server.host,
                        os:                   server.options[:os] || 'linux', # TODO get real os of :node
-                       chef_environment:     fetch(:stage)
+                       chef_environment:     fetch(:chef_environment)
                      }).merge(server.options).to_json)
             f.close
           end
@@ -114,7 +114,7 @@ DESC
 
           # :environment databag
           # ----------------------
-          stage = fetch(:stage)
+          stage = fetch(:chef_environment)
           File.open("#{env_dir}/#{stage}.json", "w") do |f|
             f.print({
                       id:    stage,
