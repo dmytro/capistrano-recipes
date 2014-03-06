@@ -21,7 +21,7 @@ Source File #{path_to __FILE__}
 
 EOF
 
-  task :roles do 
+  task :roles do
     l_sudo = sudo               # Hack to use actual sudo locally. In other places - use rvmsudo.
     set :sudo, "sudo"
     sudo "bash #{chef_solo_remote}/install.sh empty.json", options
@@ -30,7 +30,7 @@ EOF
   end                           # :roles
 
 
-  task :exit_on_request do 
+  task :exit_on_request do
     if fetch(:only_infra, false)
       logger.info "********************** ONLY INFRA specified, Infra deployed. Stopping on user request. **********************"
       exit
@@ -39,4 +39,3 @@ EOF
 end
 
 after "deploy:setup", "chefsolo:exit_on_request" if fetch(:only_infra, false)
-

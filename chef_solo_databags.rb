@@ -27,7 +27,7 @@ DESC
     task :cap do
       top.configuration_bag
     end
-    
+
     desc <<-DESC
 [internal] Build databag with server roles.
 
@@ -67,7 +67,7 @@ DESC
 
     task :roles do
       data = { }
-      
+
 
       begin
         node_dir = run_locally(%{ mktemp -d /tmp/tempdatabag.XXXX }).chomp
@@ -81,7 +81,7 @@ DESC
             roles[role] ||= []
             roles[role] << server
           end
-          
+
           # :node databag
           # ----------------------
           File.open("#{node_dir}/#{server}.json", "w") do |f|
@@ -156,4 +156,3 @@ task :configuration_bag do
   end
 
 end
-

@@ -3,7 +3,8 @@ set_default :all_hosts_rsyslog_file, "/var/log/hosts/all-hosts.log"
 #
 #
 # ==================================================================
-namespace :rsyslog do 
+
+namespace :rsyslog do
 
   desc <<-DESC
 Configure remote rsyslog - server and clients.
@@ -45,9 +46,11 @@ Templates:
  - server: templates/rsyslog/udp_receiver.conf.erb
  - client: templates/rsyslog/remote_logger.conf.erb
 DESC
-  task :setup do 
+
+  task :setup do
 
     loggers = find_servers(roles: [:logger])
+
     set :loggers, loggers
     unless loggers.empty?
       clients = find_servers - loggers
@@ -87,7 +90,7 @@ Restart rsyslog at the end of deployment.
 Source #{path_to __FILE__}
 
 DESC
-  task :restart do 
+  task :restart do
     sudo "/etc/init.d/rsyslog restart" if fetch(:changed_rsyslog, false)
   end
 end
