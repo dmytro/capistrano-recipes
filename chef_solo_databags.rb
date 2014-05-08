@@ -82,6 +82,7 @@ DESC
             roles[role] << server
           end
 
+          ip_address = (server.host =~ /(\d+\.){3}\.\d+/) ? server.host : '127.0.0.1'
           # :node databag
           # ----------------------
           File.open("#{node_dir}/#{server}.json", "w") do |f|
@@ -91,7 +92,7 @@ DESC
                        role:                 role_names_for_host(server), # 2 entires for roles `role` used by Munin, `roles` by Nagios
                        roles:                role_names_for_host(server),
                        fqdn:                 server.options[:hostname] || server.host,
-                       ipaddress:            server.host,
+                       ipaddress:            ip_address,
                        os:                   server.options[:os] || 'linux', # TODO get real os of :node
                        chef_environment:     fetch(:chef_environment)
                      }).merge(server.options).to_json)
