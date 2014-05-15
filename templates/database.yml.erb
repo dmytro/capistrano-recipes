@@ -1,7 +1,7 @@
 production:
   adapter: <%= database_adapter %>
   encoding: unicode
-  pool: 5
+  pool: 25
   timeout: 5000
 <% if database_adapter == 'sqlite3' -%>
 <%# Full path to the shared directory, so that there's no need to create symlink -%>

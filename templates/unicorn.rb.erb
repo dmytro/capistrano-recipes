@@ -26,8 +26,8 @@ timeout <%= unicorn_timeout %>
 
 preload_app true
 
-# When gems are lodaded from directory in the project tree in Gemfile 
-# (for example : `gem 'api', :path => 'engines/api'`), this part is 
+# When gems are lodaded from directory in the project tree in Gemfile
+# (for example : `gem 'api', :path => 'engines/api'`), this part is
 # required for correct reloading of Unicorn.
 #
 # See:
@@ -60,7 +60,12 @@ end
 after_fork do |server, worker|
   # the following is *required* for Rails + "preload_app true",
   if defined?(ActiveRecord::Base)
-    ActiveRecord::Base.establish_connection
+    config = ActiveRecord::Base.configurations[Rails.env] ||
+                Rails.application.config.database_configuration[Rails.env]
+    config['reaping_frequency'] = ENV['DB_REAP_FREQ'] || 10 # seconds
+    config['pool']            =   ENV['DB_POOL'] || 2
+
+    ActiveRecord::Base.establish_connection(config)
   end
 
   # if preload_app is true, then you may also want to check and
