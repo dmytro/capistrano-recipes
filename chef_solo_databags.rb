@@ -82,7 +82,7 @@ DESC
             roles[role] << server
           end
 
-          ip_address = (server.host =~ /(\d+\.){3}\.\d+/) ? server.host : '127.0.0.1'
+          ip_address = (server.host =~ /(\d+\.){3}\d+/) ? server.host : '127.0.0.1'
           # :node databag
           # ----------------------
           File.open("#{node_dir}/#{server}.json", "w") do |f|
