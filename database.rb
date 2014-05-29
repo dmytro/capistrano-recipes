@@ -6,7 +6,7 @@ set_default(:database_user) { application }
 set_default(:database_name) { "#{application}_production" }
 set_default(:database_password) { production_password }
 
-namespace :database do 
+namespace :database do
 
   desc "Generate the database.yml configuration file."
   task :setup, roles: :app do

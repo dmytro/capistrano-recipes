@@ -15,8 +15,8 @@ namespace :unicorn do
 
     desc <<-DESC
  Install /etc/init.d file for Unicorn.
-  
-  Source file: #{path_to __FILE__} 
+
+  Source file: #{path_to __FILE__}
 
 DESC
     task :install, roles: :web, except: { no_release: true } do
@@ -28,8 +28,8 @@ DESC
 
   desc <<-DESC
  Setup Unicorn initializer and app configuration.
-  
-  Source file: #{path_to __FILE__} 
+
+  Source file: #{path_to __FILE__}
 
 DESC
   task :setup, except: { no_release: true } do
@@ -39,8 +39,8 @@ DESC
 
   desc <<-DESC
  Generate and copy unicorn config.
-  
-  Source file: #{path_to __FILE__} 
+
+  Source file: #{path_to __FILE__}
 
 DESC
   task :copy, roles: :web, except: { no_release: true }  do
@@ -52,8 +52,8 @@ DESC
 
   desc <<-DESC
  Symlink unicorn config.
-  
-  Source file: #{path_to __FILE__} 
+
+  Source file: #{path_to __FILE__}
 
 DESC
   task :symlink, roles: :web, except: { no_release: true }  do
@@ -63,8 +63,8 @@ DESC
 
   desc <<-DESC
  [internal] Set commands for Unicorn restart/reload.
-  
-  Source file: #{path_to __FILE__} 
+
+  Source file: #{path_to __FILE__}
 
 DESC
   task :variables do
@@ -79,7 +79,7 @@ DESC
   desc <<-DESC
  Start Unicorn.
 
-  Source file: #{path_to __FILE__} 
+  Source file: #{path_to __FILE__}
 
 DESC
   task :start, :except => { :no_release => true } do
@@ -88,8 +88,8 @@ DESC
 
   desc <<-DESC
  Stop Unicorn.
-  
-  Source file: #{path_to __FILE__} 
+
+  Source file: #{path_to __FILE__}
 
 DESC
   task :stop, :except => { :no_release => true } do
@@ -111,35 +111,35 @@ DESC
 
   desc <<-DESC
  Restart unicorn.
-  
-  Source file: #{path_to __FILE__} 
+
+  Source file: #{path_to __FILE__}
 
 DESC
   task :restart, roles: :web, except: { no_release: true }  do
     run "if #{unicorn_running}; then #{unicorn_stop}; fi; #{unicorn_start}"
   end
 
-  namespace :logs do 
-    
+  namespace :logs do
+
     desc <<-DESC
  Tail Unicorn logs.
-  
-  Source file: #{path_to __FILE__} 
+
+  Source file: #{path_to __FILE__}
 
 DESC
-    task :tail do 
+    task :tail do
       trap("INT") { puts 'Interupted'; exit 0; }
       run "tail -f #{shared_path}/log/unicorn*.log" do |channel, stream, data|
         puts  # for an extra line break before the host name
-        puts "#{channel[:host]}: #{data}" 
-        break if stream == :err    
+        puts "#{channel[:host]}: #{data}"
+        break if stream == :err
       end
     end
-    
+
     desc <<-DESC
  Clear all Unicorn logs.
-  
-  Source file: #{path_to __FILE__} 
+
+  Source file: #{path_to __FILE__}
 
 DESC
     task :clear do
@@ -154,5 +154,3 @@ before "unicorn:start", "unicorn:variables"
 before "unicorn:restart", "unicorn:variables"
 after "deploy:start", "unicorn:start"
 after "deploy:stop", "unicorn:stop"
-
-

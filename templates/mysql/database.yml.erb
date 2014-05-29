@@ -1,8 +1,9 @@
 <%= rails_env %>:
   adapter: mysql2
   encoding: utf8
+  <% if database['pool'] -%>pool: <%= database['pool'] %><% end %>
   username: <%= database['user'] %>
   password: <%= database['password'] %>
   host:     <%= database['host'] || 'localhost' %>
   database: <%= database['database'] %>
-  <% if database['port'] -%>port: <%=database['port'] %><% end -%>
+  <% if database['port'] -%>port: <%=database['port'] %><% end %>
