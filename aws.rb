@@ -3,11 +3,6 @@
 #
 require 'fog'
 
-#
-# Will use ~/.fog file
-#
-set :aws_connection, Fog::Compute.new({ provider:  'AWS' })
-
 def original(name)
   orig  = find_servers(hosts: name).first
   aws_connection.servers.all('private-ip-address' => orig.host).first
@@ -17,13 +12,40 @@ namespace :aws do
   namespace :ec2 do
 
     desc <<-DESC
-    Clone existing server with new AIM
+    Clone existing server with new AIM.
+
+Recipe coonects to AWS API, fetches information of the existing server
+and creates a new one from provided AMI using information of the
+original server.
+
+New server will have following identical to the original:
+
+- EC2 instance type
+- VPC
+- subnet
+- availablility zone
+- security groups
+- SSH key pair
+
 
   Options
   -------------
 
-*  set `-s name=<IP or hostname>` host to clone
-*  set `-s amiid=<AMI ID>` new AMI to use for the clone
+*  set `-s name=<IP or hostname>` host to clone (required)
+*  set `-s amiid=<AMI ID>` new AMI to use for the clone.
+   If not provided as CLI option should be set in deploy recipe as `amiid` variable.
+
+  Configuration
+  -------------
+
+This recipe uses ~/.fog file for authenticating with AWS. If file is
+absent it will fail. Example of ~/.fog file:
+
+---
+:default:
+  :aws_access_key_id: "AWS_ACCESS_KEY_ID"
+  :aws_secret_access_key: "AWS_SECRET_ACCESS_KEY"
+  :region: ap-northeast-1
 
 
 Source File #{path_to __FILE__}
@@ -41,7 +63,10 @@ DESC
 
       amiid = fetch(:amiid, nil)
       orig  = original fetch(:name)
-      clone = orig.inspect
+      #
+      # Will use ~/.fog file
+      #
+      set :aws_connection, Fog::Compute.new({ provider:  'AWS' })
 
       clone = aws_connection.servers.create(
         vpc_id:             orig.vpc_id,
