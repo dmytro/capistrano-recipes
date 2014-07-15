@@ -1,3 +1,4 @@
+
 #
 # @author Dmytro Kovalov, dmytro.kovalov@gmail.com
 #
@@ -5,6 +6,7 @@ require 'fog'
 
 def original(name)
   orig  = find_servers(hosts: name).first
+  aws_connection = Fog::Compute.new({ provider:  'AWS' })
   aws_connection.servers.all('private-ip-address' => orig.host).first
 end
 
