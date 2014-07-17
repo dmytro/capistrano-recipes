@@ -69,9 +69,10 @@ DESC
         abort
       end
 
-      amiid = fetch(:amiid, nil)
-      orig  = ec2_host fetch(:name)
-      clone = aws_connection.servers.create(
+      amiid      = fetch(:amiid, nil)
+      orig       = ec2_host fetch(:name)
+      clone_name = "Copy of #{orig.tags['Name'].nil? ? fetch(:name) : orig.tags['Name']}"
+      clone      = aws_connection.servers.create(
         vpc_id:             orig.vpc_id,
         image_id:           amiid,
         availability_zone:  orig.availability_zone,
@@ -88,7 +89,8 @@ DESC
           subnet_id:           orig.subnet_id,
           device_index:       0,
           associate_public_ip_address: false
-        }]
+        }],
+        tags: orig.tags.merge('Name' => clone_name)
       )
       clone.wait_for { print "."; ready? }
 
