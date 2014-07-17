@@ -1,13 +1,19 @@
-
 #
 # @author Dmytro Kovalov, dmytro.kovalov@gmail.com
 #
 require 'fog'
 
-def original(name)
+def ec2
+  #
+  # This will use ~/.fog file, fails if file is not present
+  #
+  set :aws_connection, Fog::Compute.new({ provider:  'AWS' })
+  aws_connection
+end
+
+def ec2_host(name)
   orig  = find_servers(hosts: name).first
-  aws_connection = Fog::Compute.new({ provider:  'AWS' })
-  aws_connection.servers.all('private-ip-address' => orig.host).first
+  ec2.servers.all('private-ip-address' => orig.host).first
 end
 
 namespace :aws do
@@ -64,12 +70,7 @@ DESC
       end
 
       amiid = fetch(:amiid, nil)
-      orig  = original fetch(:name)
-      #
-      # Will use ~/.fog file
-      #
-      set :aws_connection, Fog::Compute.new({ provider:  'AWS' })
-
+      orig  = ec2_host fetch(:name)
       clone = aws_connection.servers.create(
         vpc_id:             orig.vpc_id,
         image_id:           amiid,
@@ -91,10 +92,47 @@ DESC
       )
       clone.wait_for { print "."; ready? }
 
-      puts "Public IP Address: #{clone.public_ip_address}"
+      puts "Public  IP Address: #{clone.public_ip_address}"
       puts "Private IP Address: #{clone.private_ip_address}"
 
     end
 
+    desc <<-DESC
+
+Display configuration parameters of EC2 instance.
+
+  Options
+  -------------
+
+*  set `-s name=<IP or hostname>` host to inspect (required).
+
+
+Source File #{path_to __FILE__}
+
+DESC
+    task :show do
+      unless fetch(:name, false)
+        puts "Please provide hosname or IP of existing server\n"
+        find_servers.each do |server|
+          puts "#{ server.host }: #{role_names_for_host(server).join(', ')}"
+        end
+        abort
+      end
+
+      server = find_servers(name: fetch(:name)).first
+      puts <<-PRINT
+********************************************
+Capistrano configuration
+********************************************
+Roles: #{role_names_for_host(server).join(' ')}
+#{server.to_yaml}
+
+********************************************
+AWS EC2 configuration
+********************************************
+#{ec2_host(server.host).attributes.to_yaml}
+PRINT
+
+    end
   end
 end
