@@ -1,23 +1,35 @@
 #
 # @author Dmytro Kovalov, dmytro.kovalov@gmail.com
 #
-require 'fog'
-
-def ec2
-  #
-  # This will use ~/.fog file, fails if file is not present
-  #
-  set :aws_connection, Fog::Compute.new({ provider:  'AWS' })
-  aws_connection
-end
-
-def ec2_host(name)
-  orig  = find_servers(hosts: name).first
-  ec2.servers.all('private-ip-address' => orig.host).first
-end
-
 namespace :aws do
+  require 'fog'
+
+  def check_instance_name
+  unless fetch(:name, false)
+    puts "Please provide hosname or IP of existing server\n"
+    find_servers.each do |server|
+      puts "#{ server.host }: #{role_names_for_host(server).join(', ')}"
+    end
+    abort
+  end
+  set :original_ec2_instance_name, fetch(:name)
+  set :original_capistrano_server, find_servers(name: original_ec2_instance_name).first
+  end
+
+  def connection
+    #
+    # This will use ~/.fog file, fails if file is not present
+    #
+    set :aws_connection, Fog::Compute.new({ provider:  'AWS' })
+    aws_connection
+  end
+
+
   namespace :ec2 do
+
+    def ec2_original
+      @org ||= connection.servers.all('private-ip-address' => original_capistrano_server.host).first
+    end
 
     desc <<-DESC
     Clone existing server with new AIM.
@@ -60,17 +72,10 @@ Source File #{path_to __FILE__}
 
 DESC
     task :clone_server  do
-
-      unless fetch(:name, false)
-        puts "Please provide hosname or IP of existing server\n"
-        find_servers.each do |server|
-          puts "#{ server.host }: #{role_names_for_host(server).join(', ')}"
-        end
-        abort
-      end
+      check_instance_name
 
       amiid      = fetch(:amiid, nil)
-      orig       = ec2_host fetch(:name)
+      orig       = ec2_original
       clone_name = "Copy of #{orig.tags['Name'].nil? ? fetch(:name) : orig.tags['Name']}"
       clone      = aws_connection.servers.create(
         vpc_id:             orig.vpc_id,
@@ -94,6 +99,7 @@ DESC
       )
       clone.wait_for { print "."; ready? }
 
+      puts ""
       puts "Public  IP Address: #{clone.public_ip_address}"
       puts "Private IP Address: #{clone.private_ip_address}"
 
@@ -113,15 +119,9 @@ Source File #{path_to __FILE__}
 
 DESC
     task :show do
-      unless fetch(:name, false)
-        puts "Please provide hosname or IP of existing server\n"
-        find_servers.each do |server|
-          puts "#{ server.host }: #{role_names_for_host(server).join(', ')}"
-        end
-        abort
-      end
+      check_instance_name
 
-      server = find_servers(name: fetch(:name)).first
+      server = original_capistrano_server
       puts <<-PRINT
 ********************************************
 Capistrano configuration
@@ -132,9 +132,59 @@ Roles: #{role_names_for_host(server).join(' ')}
 ********************************************
 AWS EC2 configuration
 ********************************************
-#{ec2_host(server.host).attributes.to_yaml}
+#{ec2_original.attributes.to_yaml}
 PRINT
+    end
 
+    namespace :ami do
+
+      def ami_name
+        "#{ec2_original.tags['Name'].nil? ?
+            ec2_original.id :
+            ec2_original.tags['Name']}-#{Time.now.strftime("%Y%m%d%H%M%S")}"
+          .gsub(/\s/, "_")
+
+      end
+
+      desc "List existing AMI images (only owned by me)."
+      task :list do
+        format = "%-15s%-30s%s\n"
+        imgs = connection.images.all('Owner' => 'self')
+        printf format, 'ID', 'Name', 'Description'
+        imgs.each do |i|
+          printf format, i.id, i.name, i.description
+        end
+      end
+
+      desc <<-DESC
+Create AMI image from the instance.
+
+  Options
+  -------------
+
+*  set `-s name=<IP or hostname>` original instance (required).
+*  set `-s aminame=<NEW_AMI_NAME>` to set the name.
+
+
+Source File #{path_to __FILE__}
+DESC
+
+      task :create do
+        check_instance_name
+
+
+        orig_ami = connection.images.all("image-id" => ec2_original.image_id).first
+        response = connection.create_image(
+          ec2_original.id,
+          ami_name,
+          "Created from #{ ec2_original.id }, #{orig_ami.name} "
+        )
+
+        img = connection.images.all("image-id" => response.body["imageId"]).first
+
+        img.wait_for { print "."; ready? }
+        puts img.attributes.to_yaml
+      end
     end
   end
 end
