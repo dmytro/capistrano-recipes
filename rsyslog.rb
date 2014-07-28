@@ -91,7 +91,7 @@ Source #{path_to __FILE__}
 
 DESC
   task :restart do
-    sudo "/etc/init.d/rsyslog restart" if fetch(:changed_rsyslog, false)
+    sudo "PATH=/sbin:/usr/sbin:/bin:/usr/bin service rsyslog restart" if fetch(:changed_rsyslog, false)
   end
 end
 
