@@ -1,5 +1,5 @@
 <%- def path file
-    "#{@template_path}/nginx/#{file}"
+    "#{@template_path}/nginx/#{file}.erb"
     end
 -%>
 
@@ -12,7 +12,7 @@ server {
   server_name <%= domain_name %>;
   root <%= nginx_root || "#{current_path}/public" -%>;
 
-<%= partial path "cve-2013-4547.erb"-%>
+<%= partial path "cve-2013-4547"-%>
 
 
 <%# If backend Rails process doesn't set header, then we just need to pass it. Otherwise will need to hide it. -%>
@@ -42,17 +42,13 @@ location ^~ /assets/ {
   <% end %>
 
   location / {
+      <%= partial path "https_redirect" -%>
       try_files $uri $uri/ $uri/index.html @<%= nginx_config_name %>;
   }
 
   location @<%= nginx_config_name %> {
 
-  <% if nginx_redirect_on_http_x_forwarded_proto -%>
-    if ($http_x_forwarded_proto != "https") {
-    rewrite        ^ https://$host$request_uri? permanent;
-    }
-  <% end -%>
-
+  <%= partial path "https_redirect" -%>
 
   <% if fetch(:enable_basic_auth,false) -%>
     auth_basic "<%= nginx_config_name -%> Restricted";

@@ -1,0 +1,5 @@
+<% if nginx_redirect_on_http_x_forwarded_proto -%>
+if ($http_x_forwarded_proto != "https") {
+  rewrite ^ https://$host$request_uri? permanent;
+}
+<% end -%>

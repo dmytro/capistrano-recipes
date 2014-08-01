@@ -55,7 +55,7 @@ end
 # For nested template inclusion.
 # Usage: see nginx.conf.erb for erxample
 def partial file
-  ERB.new(File.read(file)).result(binding)
+  ERB.new(File.read(file),0,'<>%-').result(binding)
 end
 
 def set_default(name, *args, &block)
