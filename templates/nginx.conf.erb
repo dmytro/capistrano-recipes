@@ -42,7 +42,7 @@ location ^~ /assets/ {
   <% end %>
 
   location / {
-      try_files $uri $uri/ $uri/index.html @coiney-web;
+      try_files $uri $uri/ $uri/index.html @<%= nginx_config_name %>;
   }
 
   location @<%= nginx_config_name %> {
