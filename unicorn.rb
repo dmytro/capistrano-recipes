@@ -1,12 +1,12 @@
-set_default(:unicorn_user) { user }
+set_default(:unicorn_user)      { user }
 set_default(:unicorn_timeout, 30)
 set_default(:unicorn_workers, 1)
-set_default(:unicorn_socket, "#{shared_path}/config/unicorn.sock")
-set_default(:unicorn_pid) { "#{shared_path}/pids/unicorn.pid" }
-set_default(:unicorn_config) { "#{shared_path}/config/unicorn.rb" }
-set_default(:unicorn_err_log) { "#{shared_path}/log/unicorn.stderr.log" }
-set_default(:unicorn_out_log) { "#{shared_path}/log/unicorn.stdout.log" }
-set_default(:unicorn_port) { 5000 } # For use with Apache since Apache can't listen on socket.
+set_default(:unicorn_socket, "# {shared_path}/config/unicorn.sock")
+set_default(:unicorn_pid)       { "#{shared_path}/pids/unicorn.pid" }
+set_default(:unicorn_config)    { "#{shared_path}/config/unicorn.rb" }
+set_default(:unicorn_err_log)   { "#{shared_path}/log/unicorn.stderr.log" }
+set_default(:unicorn_out_log)   { "#{shared_path}/log/unicorn.stdout.log" }
+set_default(:unicorn_port)      { 5000 } # For use with Apache since Apache can't listen on socket.
 
 namespace :unicorn do
 
