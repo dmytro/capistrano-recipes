@@ -1,17 +1,19 @@
-upstream <%= application %> {
+<%- def path file
+    "#{@template_path}/nginx/#{file}"
+    end
+-%>
+
+upstream <%= nginx_config_name %> {
   server unix:<%= unicorn_socket %> fail_timeout=0;
 }
 
 server {
   listen 0.0.0.0:<%= nginx_port %> default deferred;
   server_name <%= domain_name %>;
-  root <%= current_path %>/public;
+  root <%= nginx_root || "#{current_path}/public" -%>;
 
-    # Fix for CVE-2013-4547
-    # http://mailman.nginx.org/pipermail/nginx-announce/2013/000125.html
-    if ($request_uri ~ " ") {
-        return 444;
-    }
+<%= partial path "cve-2013-4547.erb"-%>
+
 
 <%# If backend Rails process doesn't set header, then we just need to pass it. Otherwise will need to hide it. -%>
   <% if fetch(:nginx_pass_server_header,false) -%>

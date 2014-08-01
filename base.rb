@@ -32,8 +32,9 @@ end
 #     to be in ../templates directory relative to this file, otherwise
 #     in the same directory relative to the __file__ parameter.
 #
-def template(from, to, __file__=nil, options: {})
-  erb = File.read(File.expand_path("../templates/#{from}", __file__ || __FILE__))
+def template(from, to, __file__=__FILE__, options: {})
+  @template_path = File.dirname(File.expand_path("../templates/#{from}", __file__))
+  erb = File.read(File.expand_path("../templates/#{from}", __file__ ))
   remote_user = options.delete :as
   if remote_user
     begin
@@ -47,6 +48,14 @@ def template(from, to, __file__=nil, options: {})
   else
     put ERB.new(erb,0,'<>%-').result(binding), to, options
   end
+end
+
+##
+# Partial parsing for template files.
+# For nested template inclusion.
+# Usage: see nginx.conf.erb for erxample
+def partial file
+  ERB.new(File.read(file)).result(binding)
 end
 
 def set_default(name, *args, &block)
