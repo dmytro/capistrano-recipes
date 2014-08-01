@@ -1,12 +1,38 @@
+#
+# Varaibles
+# ======================
+#
+# * nginx_config_name - name of the config file created by recipe. Default: same as :application
+#
+set_default(:nginx_config_name, "#{application}")
+
+#
+# Default for Rails. For multi-application configs set it to some other string.
+#
+set_default(:nginx_shared_path, "#{shared_path}")
+
 set_default(:nginx_port, 80)
 set_default(:nginx_error_pages, true)
 set_default(:nginx_chrome_frame, true)
-set_default(:domain_name, "#{application}")
-set_default(:nginx_access_log, "#{shared_path}/log/nginx_#{application}_access.log")
-set_default(:nginx_error_log, "#{shared_path}/log/nginx_#{application}_error.log")
+set_default(:domain_name, "#{nginx_config_name}")
+set_default(:nginx_access_log, "#{nginx_shared_path}/log/nginx_#{nginx_config_name}_access.log")
+set_default(:nginx_error_log, "#{nginx_shared_path}/log/nginx_#{nginx_config_name}_error.log")
 
 set_default(:nginx_redirect_on_http_x_forwarded_proto, false)
 set_default(:htpasswd_file, "#{shared_path}/config/htpasswd")
+#
+# * :nginx_root - if false will expand to `<%= current_path %>/public;`, otherwise
+#
+set_default(:nginx_root, false)
+
+#
+# For multiapplication config, set also :nginx_rails_public. If not
+# set will be set to #{current_path}/public
+#
+set_default(:nginx_rails_public, false)
+#
+# End Variable
+# ------------------------------------------------------------------
 
 namespace :nginx do
 
@@ -59,7 +85,7 @@ DESC
     template "nginx.conf.erb", "/tmp/nginx_conf"
     try_sudo "mkdir -p #{shared_path}/config"
     sudo "mkdir -p /etc/nginx/sites-enabled/"
-    sudo "mv /tmp/nginx_conf /etc/nginx/sites-enabled/#{application}"
+    sudo "mv /tmp/nginx_conf /etc/nginx/sites-enabled/#{nginx_config_name}"
     sudo "rm -f /etc/nginx/sites-enabled/default"
   end
   after "deploy:setup", "nginx:setup"
