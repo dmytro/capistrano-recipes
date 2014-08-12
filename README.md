@@ -4,7 +4,7 @@ Capistrano recipes
 ======================
 
 
-This directory contains recipes to be used together with Capistrano. To use recipe in the deployment require needed file(s) from your `deploy.rb` file. 
+This directory contains recipes to be used together with Capistrano. To use recipe in the deployment require needed file(s) from your `deploy.rb` file.
 
 **Note:** Do not automatically require all files. Some recipes implement same functionally differently depending on your requirements.
 
@@ -20,17 +20,17 @@ This repository is closely related to another one (dmytro/chef-solo) and tested 
 
 #### Boostraping server
 
-TBD 
+TBD
 
 #### Chef-solo roles and Capistrano roles
 
-TBD 
+TBD
 
 #### Custom chef-solo setup
 
-TBD 
+TBD
 
-#### Using Chef databags 
+#### Using Chef databags
 
 It is possible to use Chef databags in Capistrano recipes. Databags are loaded from either custom Chef-solo path or from standard one. If custom path is defined (variable `:custom_chef_solo` defined when recipe `custom_chef_solo` is loaded), then custom path is used.
 
@@ -88,6 +88,7 @@ Set variable conditionally.
 - rbenv.rb - TODO
 - setup.rb - Change ownership of the created directories at the setup stage
   - `:deploy:chown_dirs`
+- ensure_tagged_release - if this recipe is included, before deployment it will check that current checked out deployment code (not application) is tagged. This is to ensure that production setups are released only using stable code. Relase tag should be formatted acordingly to Semantic versioningn (vA.B.C).
 
 #### Remote logs
 
@@ -204,4 +205,3 @@ Recipe to restart Nginx on systems with Monit
 - fast.rb
 - nodejs.rb - TODO: refactor install to use Chef
 - talks.rb - TODO
-
