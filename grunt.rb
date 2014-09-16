@@ -14,6 +14,8 @@ namespace :deploy do
     task :install do
       run "which npm > /dev/null || ( #{chef_solo_command} #{chef_solo_remote}/web.json )"
       run "cd ~#{user} && mkdir -p tmp .npm && #{sudo} chown -R #{user}:#{user} tmp .npm "
+      run "cd #{shared_path} && mkdir -p node_modules"
+      run "cd #{current_release} && ln -nfs #{shared_path}/node_modules"
       run "cd #{current_release}; npm install > /tmp/npm-install.log 2>&1 "
     end
   end
