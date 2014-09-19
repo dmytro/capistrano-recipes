@@ -154,12 +154,13 @@ end
 def upload_dir local, remote, options: {}, exclude: ["./.git"]
   begin
     temp = %x{ mktemp /tmp/captemp-tar.XXXX }.chomp
+    remote_temp = "/tmp/captemp.#{SecureRandom.hex}"
     run_locally "cd #{local} && tar cfz #{temp} #{exclude.map { |e| "--exclude #{e}" }.join(' ')} ."
-    upload temp, temp
-    run "mkdir -p #{remote} && cd #{remote} && tar xfz #{temp}", options
+    upload temp, remote_temp
+    run "mkdir -p #{remote} && cd #{remote} && tar xfz #{remote_temp}", options
   ensure
     run_locally "rm -f #{temp}"
-    run  "rm -f #{temp}", options
+    run  "rm -f #{remote_temp}", options
   end
 end
 
