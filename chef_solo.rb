@@ -105,6 +105,7 @@ EOF
 
         top.chefsolo.databag.cap
         top.chefsolo.databag.roles
+        top.chefsolo.databag.secrets if fetch(:use_s3_secrets, false)
 
         # make sure directories are cleaned between runs
         run "(cd #{chef_solo_remote} && #{sudo} rm -rf cookbooks site-cookbooks data_bags); true "

@@ -2,6 +2,7 @@
 require 'chef/application/solo'
 require 'chef/data_bag_item'
 require 'pathname'
+require 'securerandom'
 
 ##
 # Read databag on local host, using custom directory if it is defined.

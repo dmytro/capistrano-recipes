@@ -133,6 +133,30 @@ DESC
        run_locally "rm -rf #{node_dir} #{role_dir} #{env_dir}"
       end
     end
+
+    desc <<-EOF
+Installs secret databags from S3.
+
+Databags are copied to chef/data_bags directory. Recipe does not
+overwrite existing file.
+
+Configuration:
+
+- To enable recipe set :use_s3_secrets to true:
+
+   set :use_s3_secrets, true
+
+
+- Set URI to access data_bags on S3:
+
+   set :s3_secret_databag_path, "s3://secrets/data_bags/"
+
+Source File #{path_to __FILE__}
+
+EOF
+    task :secrets do
+      run "s3cmd get --recursive --skip-existing --no-progress #{s3_secret_databag_path} #{local_chef_cache_dir}/ > /tmp/s3cmd.log"
+    end
   end                           # namespace databag
 end                             # namespace chefsolo
 
