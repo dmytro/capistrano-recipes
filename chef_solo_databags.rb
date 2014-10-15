@@ -93,13 +93,16 @@ DESC
           File.open("#{node_dir}/#{server}.json", "w") do |f|
             f.print(({
                        id:                   server.host.gsub(/\./,'_'),
-                       name:                 server.host,
-                       role:                 role_names_for_host(server), # 2 entires for roles `role` used by Munin, `roles` by Nagios
+                       name:                server.host,
+                       keys: '',
+                       # 2 entires for roles `role` used by Munin, `roles` by Nagios
+                       role:                 role_names_for_host(server),
                        roles:                role_names_for_host(server),
                        fqdn:                 server.options[:hostname] || server.host,
                        ipaddress:            ip_address,
                        os:                   server.options[:os] || 'linux', # TODO get real os of :node
-                       chef_environment:     fetch(:chef_environment)
+                       chef_environment:     fetch(:chef_environment),
+                       ossec:                {  } #need for search in ossec cookbook
                      }).merge(server.options).to_json)
             f.close
           end
