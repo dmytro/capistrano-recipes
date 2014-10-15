@@ -114,8 +114,10 @@ EOF
         run_locally "rm -rf #{local_chef_cache_dir}"
       end
 
-      top.chefsolo.roles
-      set :chef_solo_bootstrap_ran, true # Make sure that deploy of chef-solo never runs twice
+      unless chef_solo_bootstrap_skip
+        top.chefsolo.roles
+        set :chef_solo_bootstrap_ran, true # Make sure that deploy of chef-solo never runs twice
+      end
 
     end
 
@@ -123,4 +125,4 @@ EOF
   end
 end
 
-before "deploy", "chefsolo:deploy" unless fetch(:chef_solo_bootstrap_skip, true)
+before "deploy", "chefsolo:deploy"
