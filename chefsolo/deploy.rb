@@ -76,34 +76,16 @@ EOF
 
     unless fetch(:chef_solo_bootstrap_ran, false)
 
-      begin
-        dir = run_locally(%{ mktemp -d /tmp/tempchef.XXXX }).chomp
+      tag = fetch(:capiche_release_tag, %x{git rev-parse HEAD}).chomp
 
-       tag = fetch(:capiche_release_tag, %x{git rev-parse HEAD}).chomp
-
-        open("#{dir}/CAPICHE_RELEASE", "w") do |f|
-          f.print tag
-          f.close
-        end
-
-        set :local_chef_cache_dir, dir
-
-        copy_dir chef_solo_path, dir, exclude: %w{./.git ./tmp}
-
-        if exists?(:custom_chef_solo) && Dir.exists?(custom_chef_solo)
-          copy_dir custom_chef_solo, dir, exclude: %w{./.git ./tmp}
-        end
-
-        top.chefsolo.databag.cap
-        top.chefsolo.databag.roles
-        top.chefsolo.databag.secrets if fetch(:use_s3_secrets, false)
-
-        # make sure directories are cleaned between runs
-        run "(cd #{chef_solo_remote} && #{sudo} rm -rf cookbooks site-cookbooks data_bags); true "
-        upload_dir dir, chef_solo_remote, options: options
-      ensure
-        run_locally "rm -rf #{local_chef_cache_dir}"
+      open("#{local_chef_cache_dir}/CAPICHE_RELEASE", "w") do |f|
+        f.print tag
+        f.close
       end
+
+      # make sure directories are cleaned between runs
+      run "(cd #{chef_solo_remote} && #{sudo} rm -rf cookbooks site-cookbooks data_bags); true "
+      upload_dir local_chef_cache_dir, chef_solo_remote, options: options
 
       unless chef_solo_bootstrap_skip
         top.chefsolo.roles

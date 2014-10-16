@@ -1,5 +1,3 @@
-set_default :chef_solo_roles_skip, false
-
 namespace :chefsolo do
 
   desc <<-EOF
