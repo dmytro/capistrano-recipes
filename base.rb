@@ -9,14 +9,13 @@ require 'securerandom'
 #
 def get_data_bag bag, item=nil
   Chef::Config[:solo] = true
-  Chef::Config[:data_bag_path] = "#{(exists?(:custom_chef_solo) ? custom_chef_solo : chef_solo_path)}/data_bags"
+  Chef::Config[:data_bag_path] = "#{local_chef_cache_dir}/data_bags"
 
   if item
     Chef::DataBagItem.load(bag, item.to_s).raw_data
   else
     Chef::DataBag.load(bag)
   end
-
 end
 
 ##

@@ -22,7 +22,8 @@ recipe "chefsolo/exit_on_request"
 recipe "chefsolo/roles"
 recipe "chefsolo/setup"
 
-before "chefsolo:deploy", "chefsolo:setup"
-before "deploy",          "chefsolo:deploy"
-after  "deploy:setup",    "chefsolo:exit_on_request" if fetch(:only_infra, false)
-on     :finish,           "chefsolo:cleanup"
+on :start,  "chefsolo:setup",   :except => config_names
+on :finish, "chefsolo:cleanup", :except => config_names
+
+before "deploy",       "chefsolo:deploy"
+after  "deploy:setup", "chefsolo:exit_on_request" if fetch(:only_infra, false)
