@@ -11,7 +11,7 @@ namespace :chefsolo do
 
 EOF
   task :cleanup do
-    #run_locally(%{ rm -rf #{ local_chef_cache_dir }}) if fetch(:local_chef_cache_dir,false)
+    run_locally(%{ rm -rf #{ local_chef_cache_dir }}) if fetch(:local_chef_cache_dir,false)
     unset :local_chef_cache_dir
   end
 
