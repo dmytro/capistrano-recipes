@@ -28,14 +28,4 @@ EOF
     set :sudo, l_sudo
     run %Q{ #{try_sudo} /usr/local/rvm/bin/rvm-exec #{chef_solo_remote}/run_roles.rb  $CAPISTRANO:HOST$ }
   end                           # :roles
-
-
-  task :exit_on_request do
-    if fetch(:only_infra, false)
-      logger.info "********************** ONLY INFRA specified, Infra deployed. Stopping on user request. **********************"
-      exit
-    end
-  end
 end
-
-after "deploy:setup", "chefsolo:exit_on_request" if fetch(:only_infra, false)

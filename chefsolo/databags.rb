@@ -1,11 +1,5 @@
 # -*- coding: utf-8 -*-
 
-set_default :s3_secret_databag_path, "/secrets/data_bags/"
-set_default :s3_region, "ap-northeast"
-
-require 'json'
-require "aws/s3"
-
 namespace :chefsolo do
   namespace :databag do
 
@@ -14,6 +8,18 @@ namespace :chefsolo do
     # def write_databag name, data
     # end
 
+
+    task :setup do
+      puts "++++++++++++++++++++++++++++++++++++++++++++ set"
+      set :local_databag_path, "bla"
+      puts local_databag_path
+    end
+
+    task :cleanup do
+      puts "++++++++++++++++++++++++++++++++++++++++++++ clean"
+      unset :local_databag_path
+      puts local_databag_path
+    end
 
     desc <<-DESC
 [internal] Build Chef databag from Capistrano configuration.

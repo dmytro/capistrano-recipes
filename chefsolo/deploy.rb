@@ -1,15 +1,6 @@
 #
 # @author Dmytro Kovalov, dmytro.kovalov@gmail.com
 #
-
-set_default :chef_solo_path,       File.expand_path("../chef-solo/", File.dirname(__FILE__))
-set_default :chef_solo_json,       "empty.json"
-set_default :chef_solo_remote,     "~#{user}/chef"
-set_default :chef_solo_command,    %Q{cd #{chef_solo_remote} && #{try_sudo} chef-solo --config #{chef_solo_remote}/solo.rb --json-attributes }
-set_default :chef_solo_bootstrap_skip, false
-
-load File.join(File.dirname(__FILE__), "chef_solo_databags.rb")
-
 namespace :chefsolo do
 
   desc <<-EOF
@@ -120,9 +111,5 @@ EOF
       end
 
     end
-
-
   end
 end
-
-before "deploy", "chefsolo:deploy"
