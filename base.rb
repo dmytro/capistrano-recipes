@@ -9,14 +9,13 @@ require 'securerandom'
 #
 def get_data_bag bag, item=nil
   Chef::Config[:solo] = true
-  Chef::Config[:data_bag_path] = "#{(exists?(:custom_chef_solo) ? custom_chef_solo : chef_solo_path)}/data_bags"
+  Chef::Config[:data_bag_path] = "#{local_chef_cache_dir}/data_bags"
 
   if item
     Chef::DataBagItem.load(bag, item.to_s).raw_data
   else
     Chef::DataBag.load(bag)
   end
-
 end
 
 ##
@@ -130,12 +129,13 @@ set_default :recipe_base, "lib"
 #     without .rb extension.
 #
 # @param local [Boolean] If `true` try to load recipe from
-#     `local_recipes` subdirectory. Otherwise use subdirectory
+#     `site/recipes` subdirectory. Otherwise use subdirectory
 #     `recipes`. Recipes is git submodule with generic recipes, while
-#     `local_recipes` is local subdirectory with collection of the
+#     `site/recipes` is local subdirectory with collection of the
 #     recipes that are used only in the current project.
 #
 def recipe name, local = false
+#  path = local ? "site/recipes" : "recipes"
   path = local ? "local_recipes" : "recipes"
   load File.expand_path("#{recipe_base}/#{path}/#{name.to_s}.rb")
 end
