@@ -29,7 +29,6 @@ Databag format
         "logger"
       ],
       "options": {
-        "app_type": "admins",
         "hostname": "admin-test"
       },
       "ipaddress": "10.0.40.252",

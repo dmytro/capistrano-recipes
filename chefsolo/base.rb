@@ -4,7 +4,7 @@
 require 'json'
 require "aws/s3"
 
-set_default :chef_solo_path,           "#{capiche_root}/lib/chef-solo/"
+set_default :bootstrap_path,           "#{capiche_root}/lib/bootstrap/"
 set_default :chef_solo_json,           "empty.json"
 set_default :chef_solo_remote,         "~#{user}/chef"
 set_default :chef_solo_command,        %Q{cd #{chef_solo_remote} && #{try_sudo} chef-solo --config #{chef_solo_remote}/solo.rb --json-attributes }
@@ -15,6 +15,11 @@ set_default :use_s3_secrets,           false
 set_default :s3_secret_databag_path,   "/secrets/data_bags/"
 set_default :s3_region,                "ap-northeast"
 
+#
+# Other variables
+#
+# - local_chef_cache_dir - set in chefsolo/setup.rb recipe
+#
 recipe "chefsolo/cleanup"
 recipe "chefsolo/databags"
 recipe "chefsolo/deploy"

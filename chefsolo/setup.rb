@@ -16,7 +16,7 @@ EOF
   task :setup do
     set :local_chef_cache_dir, run_locally(%{ mktemp -d /tmp/tempchef.XXXX }).chomp
 
-    copy_dir chef_solo_path, local_chef_cache_dir, exclude: %w{./.git ./tmp}
+    copy_dir bootstrap_path, local_chef_cache_dir, exclude: %w{./.git ./tmp}
 
     if exists?(:custom_chef_solo) && Dir.exists?(custom_chef_solo)
       copy_dir custom_chef_solo, local_chef_cache_dir, exclude: %w{./.git ./tmp}
