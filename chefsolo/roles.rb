@@ -22,7 +22,7 @@ EOF
   task :roles do
     l_sudo = sudo               # Hack to use actual sudo locally. In other places - use rvmsudo.
     set :sudo, "sudo"
-    sudo "bash #{chef_solo_remote}/install.sh empty.json", options
+    sudo "bash #{chef_solo_remote}/bootstrap.sh empty.json", options
     set :sudo, l_sudo
     run %Q{ #{try_sudo} /usr/local/rvm/bin/rvm-exec #{chef_solo_remote}/run_roles.rb  $CAPISTRANO:HOST$ }
   end                           # :roles
