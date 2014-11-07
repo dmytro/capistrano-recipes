@@ -82,7 +82,7 @@ DESC
   Source file: #{path_to __FILE__}
 
 DESC
-  task :start, :except => { :no_release => true } do
+  task :start, roles: :web, :except => { :no_release => true } do
     run unicorn_start
   end
 
@@ -92,7 +92,7 @@ DESC
   Source file: #{path_to __FILE__}
 
 DESC
-  task :stop, :except => { :no_release => true } do
+  task :stop, roles: :web, :except => { :no_release => true } do
     run unicorn_stop
   end
 
@@ -152,5 +152,7 @@ end
 before "unicorn:reload", "unicorn:variables"
 before "unicorn:start", "unicorn:variables"
 before "unicorn:restart", "unicorn:variables"
+before "unicorn:stop", "unicorn:variables"
+
 after "deploy:start", "unicorn:start"
 after "deploy:stop", "unicorn:stop"
