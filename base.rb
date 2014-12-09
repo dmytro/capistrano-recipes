@@ -4,6 +4,15 @@ require 'chef/data_bag_item'
 require 'pathname'
 require 'securerandom'
 
+$LOAD_PATH << "#{File.dirname(__FILE__)}/lib"
+require "git_tags"
+
+
+def fatal(str)
+  sep = "\n\n#{'*' * 80}\n\n"
+  abort "#{sep}\t#{str}#{sep}"
+end
+
 ##
 # Read databag on local host, using custom directory if it is defined.
 #
@@ -24,6 +33,31 @@ end
 def path_to file
   Pathname.new(file).relative_path_from(Pathname.new(ENV['PWD'])).to_s
 end
+
+##
+# Ensure that application code is tagged. Deploy only code from the git tag.
+#
+def ensure_release_tagged
+  set :branch do
+    tags = GitTags.new(repository).tags
+    default = tags.last
+    fatal "Cannot find any tags in the repository" if default.nil?
+
+    puts <<-PUT
+********************************************
+Found tags:
+#{tags[-10..-1].join("\n")}
+********************************************
+    PUT
+
+    tag = Capistrano::CLI.ui.ask "\n\n Choose a tag to deploy (make sure to push the tag first): [Default: #{default}] "
+    tag = default if tag.empty?
+
+    fatal "Cannot deploy as no tag was found" if tag.nil?
+    tag
+  end
+end
+
 
 ##
 # Parse ERB template from tempaltes directory and upload to target server.
