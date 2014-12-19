@@ -21,4 +21,6 @@ DESC
   end
 end
 
-before "deploy:setup", "deploy:before:ensure_tag"
+before "chefsolo:setup", "deploy:before:ensure_tag",   :except => config_names
+# Incase if there's no chefsolo:setup
+on :start,  "chefsolo:setup",   :except => (config_names << "chefsolo:setup")
