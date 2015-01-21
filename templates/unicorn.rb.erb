@@ -68,6 +68,14 @@ after_fork do |server, worker|
     ActiveRecord::Base.establish_connection(config)
   end
 
+  trap(:INT) do
+    File.open("#{Rails.root}/log/killed-workers-stacktrace.log", "a") do |file|
+      file.puts Thread.current.backtrace.join("\n")
+      file.puts
+    end
+    Process.kill :KILL, $$
+  end
+
   # if preload_app is true, then you may also want to check and
   # restart any other shared sockets/descriptors such as Memcached,
   # and Redis.  TokyoCabinet file handles are safe to reuse
