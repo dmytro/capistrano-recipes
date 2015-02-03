@@ -85,7 +85,11 @@ EOF
 
       # make sure directories are cleaned between runs
       run "(cd #{chef_solo_remote} && #{sudo} rm -rf cookbooks site-cookbooks data_bags); true "
-      upload_dir local_chef_cache_dir, chef_solo_remote, options: options
+      begin
+        upload_dir local_chef_cache_dir, chef_solo_remote, options: options
+      ensure
+        run_locally "rm -rf #{ local_chef_cache_dir }"
+      end
 
       unless chef_solo_bootstrap_skip
         top.chefsolo.roles
