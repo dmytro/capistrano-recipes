@@ -150,6 +150,7 @@ def test_command cmd
 end
 
 set_default :recipe_base, "lib"
+set_default :config_sub_dir, ""
 
 #
 # DSL extensions. Some functions to extend current Capistrano DSL with
