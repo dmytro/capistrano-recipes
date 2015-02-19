@@ -36,33 +36,49 @@ def _slack_channel
 end
 
 
-namespace :notify do
+namespace :slack do
   namespace :deploy do
     task :start do
-      msg  = "Yes, my lord.\n Start deploying \`#{fetch(:branch)}\` @ \`#{fetch(:application)}\` to \`#{fetch(:chef_environment)}\` by order of \`#{fetch(:user_name)}\`."
+
+      msg = "Yes, my master. Now deploying ...\n"
+      if fetch(:only_infra, false)
+        msg << "\`Application : infrastructure}\`\n"
+      elsif fetch(:with_infra, false)
+        msg << "\`Application : #{fetch(:application)}, infrastructure\`\n"
+      else
+        msg << "\`Application : #{fetch(:application)}\`\n"
+      end
+      msg << "\`Branch/Tag  : #{fetch(:branch)}\`\n"
+      msg << "\`Environment : #{fetch(:chef_environment)}\`\n"
+      msg << "\`My master   : #{fetch(:user_name)}\`\n"
+
+      logger.info msg
       _send_message(msg, _slack_channel)
     end
  
     task :finish do
       msg  = "[\`#{fetch(:application)}\`] Deployment complete, sir! :thumbsup:\n"
+      logger.info msg
       _send_message(msg, _slack_channel)
     end
   end
  
   namespace :rollback do
     task :start do
-      msg  = "[\`#{fetch(:application)}\`] Yes, my lord. Rollback has started.\nCurrent Revision is \`#{fetch(:latest_revision)}\`"
+      msg  = "[\`#{fetch(:application)}\`] Yes, my master. Rollback has started.\nCurrent Revision is \`#{fetch(:latest_revision)}\`"
+      logger.info msg
       _send_message(msg, _slack_channel)
     end
  
     task :finish do
       msg  = "[\`#{fetch(:application)}\`] Rollback complete, sir! :ok_woman:\nCurrent revision is \`#{fetch(:current_revision)}\`"
+      logger.info msg
       _send_message(msg, _slack_channel)
     end
   end
 end
  
-before 'chefsolo:setup', 'notify:deploy:start'
-after 'chefsolo:cleanup', 'notify:deploy:finish'
-before 'deploy:rollback', 'notify:rollback:start'
-after 'deploy:rollback:cleanup', 'notify:rollback:finish'
+before 'deploy', 'slack:deploy:start'
+after 'deploy:cleanup', 'slack:deploy:finish'
+before 'deploy:rollback', 'slack:rollback:start'
+after 'deploy:rollback:cleanup', 'slack:rollback:finish'
