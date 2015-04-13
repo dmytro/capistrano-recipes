@@ -40,17 +40,19 @@ namespace :slack do
   namespace :deploy do
     task :start do
 
-      msg = "Yes, my master. Now deploying ...\n"
+      msg = "@channel:\n Hey guys, I just started deployment by order of my commander.\n"
+      msg << "\`\`\`\n"
       if fetch(:only_infra, false)
-        msg << "\`Application : infrastructure}\`\n"
+        msg << "Application  : infrastructure}\n"
       elsif fetch(:with_infra, false)
-        msg << "\`Application : #{fetch(:application)}, infrastructure\`\n"
+        msg << "Application  : #{fetch(:application)}, infrastructure\n"
       else
-        msg << "\`Application : #{fetch(:application)}\`\n"
+        msg << "Application  : #{fetch(:application)}\n"
       end
-      msg << "\`Branch/Tag  : #{fetch(:branch)}\`\n"
-      msg << "\`Environment : #{fetch(:chef_environment)}\`\n"
-      msg << "\`My master   : #{fetch(:user_name)}\`\n"
+      msg << "Branch/Tag   : #{fetch(:branch)}\n"
+      msg << "Environment  : #{fetch(:chef_environment)}\n"
+      msg << "My commander : #{fetch(:user_name)}\n"
+      msg << "\`\`\`\n"
 
       logger.info msg
       _send_message(msg, _slack_channel)
