@@ -32,7 +32,7 @@ def _send_message(message, channel)
 end
 
 def _slack_channel
-  (fetch(:chef_environment) == "testing") ? "dev_test" : "#dev-deploy"
+  (fetch(:stage) == "localhost") ? "dev_test" : "#dev-deploy"
 end
 
 
@@ -50,7 +50,7 @@ namespace :slack do
         msg << "Application  : #{fetch(:application)}\n"
       end
       msg << "Branch/Tag   : #{fetch(:branch)}\n"
-      msg << "Environment  : #{fetch(:chef_environment)}\n"
+      msg << "Environment  : #{fetch(:stage)}\n"
       msg << "My commander : #{fetch(:user_name)}\n"
       msg << "\`\`\`\n"
 
