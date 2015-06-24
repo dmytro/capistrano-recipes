@@ -40,7 +40,7 @@ namespace :slack do
   namespace :deploy do
     task :start do
 
-      msg = "@channel:\n Hey guys, I just started deployment by order of my commander.\n"
+      msg = "<!channel>\n Hey guys, I just started deployment by order of my commander.\n"
       msg << "\`\`\`\n"
       if fetch(:only_infra, false)
         msg << "Application  : infrastructure}\n"
