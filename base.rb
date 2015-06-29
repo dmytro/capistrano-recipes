@@ -170,8 +170,7 @@ set_default :config_sub_dir, ""
 #     recipes that are used only in the current project.
 #
 def recipe name, local = false
-#  path = local ? "site/recipes" : "recipes"
-  path = local ? "local_recipes" : "recipes"
+  path = local ? "site/recipes" : "recipes"
   load File.expand_path("#{recipe_base}/#{path}/#{name.to_s}.rb")
 end
 
