@@ -4,7 +4,6 @@
 require 'json'
 require "aws/s3"
 
-set_default :chef_solo_path,           "#{capiche_root}/lib/chef-solo/"
 set_default :chef_solo_json,           "empty.json"
 set_default :chef_solo_remote,         "~#{user}/chef"
 set_default :chef_solo_command,        %Q{cd #{chef_solo_remote} && #{try_sudo} chef-solo --config #{chef_solo_remote}/solo.rb --json-attributes }
