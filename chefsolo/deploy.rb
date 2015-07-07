@@ -12,7 +12,7 @@ namespace :chefsolo do
    Configuration and defaults
    --------------------------
 
-    * set :chef_solo_path, <PATH>
+    * set :bootstrap_path, <PATH>
 
       Local PATH to the directory where, chef-solo is installed. By
       default searched in ../chef-solo/
