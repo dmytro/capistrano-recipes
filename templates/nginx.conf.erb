@@ -1,85 +1,43 @@
-<%- def path file
-    "#{@template_path}/nginx/#{file}.erb"
-    end
--%>
+user nginx;
+worker_processes  1;
 
-upstream <%= nginx_config_name %> {
-  server unix:<%= unicorn_socket %> fail_timeout=0;
+error_log  /var/log/nginx/error.log;
+pid        /var/run/nginx.pid;
+
+events {
+  worker_connections  1024;
 }
 
-server {
-  listen 0.0.0.0:<%= nginx_port %> default deferred;
-  server_name <%= domain_name %>;
-  root <%= nginx_root || "#{current_path}/public" -%>;
+http {
 
-<%= partial path "cve-2013-4547"-%>
-
-
-<%# If backend Rails process doesn't set header, then we just need to pass it. Otherwise will need to hide it. -%>
-  <% if fetch(:nginx_pass_server_header,false) -%>
-    server_tokens off;
-    proxy_pass_header Server;
-  <% end -%>
-
-<% if nginx_redirect_on_http_x_forwarded_proto -%>
-  location /healthcheck.txt {
-      return 200;
-  }
-<% end -%>
-
-<% if fetch(:nginx_x_frame_options_allow_from, false) -%>
-  add_header X-Frame-Options "ALLOW-FROM <%= nginx_x_frame_options_allow_from.join(" ") %>";
-<% end -%>
-
-  set $real_ip "";
-  if ($http_x_forwarded_for ~ ^([0-9\.]+)) {
-      set $real_ip $1;
-  }
+  include       /etc/nginx/mime.types;
+  default_type  application/octet-stream;
 
   log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
                     '$status $body_bytes_sent "$http_referer" '
-                    '"$http_user_agent" $real_ip '
-                    '$request_time';
+                    '"$http_user_agent" $real_ip $request_time';
 
-  access_log "<%= nginx_access_log -%>" main;
-  error_log  "<%= nginx_error_log -%>";
+  access_log    /var/log/nginx/access.log main;
 
-location ^~ /assets/ {
-    root <%= nginx_rails_public || "#{current_path}/public" -%>;
-    gzip_static on;
-    expires max;
-    add_header Cache-Control public;
-  }
+  sendfile on;
+  tcp_nopush on;
+  tcp_nodelay on;
 
-  <% if nginx_chrome_frame %>
-  add_header "X-UA-Compatible" "IE=Edge,chrome=1";
-  <% end %>
+  keepalive_timeout  65;
 
-  location / {
-      <%= partial path "https_redirect" -%>
-      try_files $uri $uri/ $uri/index.html @<%= nginx_config_name %>;
-  }
+  gzip  on;
+  gzip_http_version 1.0;
+  gzip_comp_level 2;
+  gzip_proxied any;
+  gzip_vary off;
+  gzip_types text/plain text/css application/x-javascript text/xml application/xml application/rss+xml application/atom+xml text/javascript application/javascript application/json text/mathml;
+  gzip_min_length  1000;
+  gzip_disable     "MSIE [1-6]\.";
 
-  location @<%= nginx_config_name %> {
+  server_names_hash_bucket_size 64;
+  types_hash_max_size 2048;
+  types_hash_bucket_size 64;
 
-  <%= partial path "https_redirect" -%>
-
-  <% if fetch(:enable_basic_auth,false) -%>
-    auth_basic "<%= nginx_config_name -%> Restricted";
-    auth_basic_user_file <%= htpasswd_file -%>;
-  <% end -%>
-
-    root <%= nginx_rails_public || "#{current_path}/public" -%>;
-
-    proxy_pass http://<%= nginx_config_name %>;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header Host $http_host;
-    proxy_redirect off;
-  }
-
-  <% if nginx_error_pages %>
-  error_page 500 502 503 504 /500.html;
-  <% end %>
-  client_max_body_size 4G;
-  keepalive_timeout 10;
+  include /etc/nginx/conf.d/*.conf;
+  include /etc/nginx/sites-enabled/*;
 }

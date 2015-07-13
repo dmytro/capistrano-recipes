@@ -82,10 +82,13 @@ Source #{path_to __FILE__}
 
 DESC
   task :setup, roles: [:app, :web], except: { no_release: true } do
+    template "nginx_site.conf.erb", "/tmp/nginx_site_conf"
     template "nginx.conf.erb", "/tmp/nginx_conf"
     try_sudo "mkdir -p #{shared_path}/config"
     sudo "mkdir -p /etc/nginx/sites-enabled/"
-    sudo "mv /tmp/nginx_conf /etc/nginx/sites-enabled/#{nginx_config_name}"
+    sudo "mv /tmp/nginx_site_conf /etc/nginx/sites-available/#{nginx_config_name}"
+    sudo "ln -s /etc/nginx/sites-available/#{nginx_config_name} /etc/nginx/sites-enabled/"
+    sudo "mv /tmp/nginx_conf /etc/nginx/nginx.conf"
     sudo "rm -f /etc/nginx/sites-enabled/default"
   end
   after "deploy:setup", "nginx:setup"
