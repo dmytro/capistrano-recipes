@@ -17,6 +17,7 @@ set_default(:nginx_chrome_frame, true)
 set_default(:domain_name, "#{nginx_config_name}")
 set_default(:nginx_access_log, "#{nginx_shared_path}/log/nginx_#{nginx_config_name}_access.log")
 set_default(:nginx_error_log, "#{nginx_shared_path}/log/nginx_#{nginx_config_name}_error.log")
+set_default(:nginx_proxy_read_timeout, 30)
 
 set_default(:nginx_redirect_on_http_x_forwarded_proto, false)
 set_default(:htpasswd_file, "#{shared_path}/config/htpasswd")
