@@ -35,6 +35,10 @@ def _slack_channel
   (fetch(:stage) == "localhost") ? "dev_test" : "#dev-deploy"
 end
 
+def _target_servers
+  servers = find_servers()
+  servers.map { |s| "#{s.host} (#{s.options[:hostname]})" }.join(", ")
+end
 
 namespace :slack do
   namespace :deploy do
@@ -51,6 +55,7 @@ namespace :slack do
       end
       msg << "Branch/Tag   : #{fetch(:branch)}\n"
       msg << "Environment  : #{fetch(:stage)}\n"
+      msg << "Target hosts : #{_target_servers}\n"
       msg << "My commander : #{fetch(:user_name)}\n"
       msg << "\`\`\`\n"
 
